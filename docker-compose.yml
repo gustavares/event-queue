@@ -1,0 +1,42 @@
+services:
+  # db:
+  #   image: postgres:15
+  #   container_name: postgres-db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+
+  go-app:
+    build:
+      context: ./go-app
+      dockerfile: Dockerfile
+    container_name: go-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      # depends_on:
+      # - db
+
+      # volumes:
+      #   db_data:
+
+  ui-app:
+    image: ui-event-app
+    build:
+      context: ./UI-event-management
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
