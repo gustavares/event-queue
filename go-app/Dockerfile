@@ -14,4 +14,8 @@ RUN go build -o main .
 EXPOSE 8080
 
 # Run the app with CompileDaemon for hot reloading
-CMD ["CompileDaemon", "--build=main.go", "--command=./main"]
+# CMD ["CompileDaemon", "--build=main.go", "--command=./main"]
+CMD ["CompileDaemon", "--command=./main"]
+
+# CMD ["./main"]
+
