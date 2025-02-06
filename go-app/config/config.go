@@ -31,7 +31,7 @@ var AppConfig *Config
 
 // LoadConfig initializes Viper and loads environment variables
 func LoadConfig() *Config {
-	viper.SetConfigFile("../.env")
+	viper.SetConfigFile("./.env")
 	viper.SetConfigType("env")
 	viper.AutomaticEnv() // Automatically map environment variables
 
@@ -40,7 +40,7 @@ func LoadConfig() *Config {
 
 	// Read from file if available
 	if err := viper.ReadInConfig(); err != nil {
-		log.Println("No .env file found, using system environment variables.")
+		log.Fatalf("No .env file found")
 	}
 
 	// Parse configuration into the struct
