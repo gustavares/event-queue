@@ -12,7 +12,6 @@ import (
 func main() {
 	// Load configuration
 	cfg := config.GetConfig()
-	fmt.Printf("Loaded Config: %+v\n", cfg) // DEBUG: Print config
 
 	// PostgreSQL connection string
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
