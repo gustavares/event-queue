@@ -33,5 +33,13 @@ services:
   #   ports:
   #     - 3000:3000
 
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    restart: always
+    ports:
+      - "1025:1025" # SMTP port for sending emails
+      - "8025:8025" # Web UI to view emails
+
 volumes:
   db_data:
