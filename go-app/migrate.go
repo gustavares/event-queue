@@ -11,8 +11,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func runMigrations(db *sql.DB) {
-	cfg := config.GetConfig()
+func runMigrations(db *sql.DB, cfg *config.Config) {
 	migrationsPath := cfg.Env.MigrationsPath
 	// Get the environment
 	// env := os.Getenv("GO_ENV")

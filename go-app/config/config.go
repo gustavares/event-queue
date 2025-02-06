@@ -62,6 +62,8 @@ func LoadConfig() *Config {
 	return AppConfig
 }
 
+// TODO stop using a global variable, just return the config to be set in the app struct
+
 // GetConfig returns the global AppConfig object
 func GetConfig() *Config {
 	if AppConfig == nil {
