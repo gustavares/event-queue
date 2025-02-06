@@ -9,13 +9,14 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o main .
+RUN go build -o /main .
 
 EXPOSE 8080
 
 # Run the app with CompileDaemon for hot reloading
 # CMD ["CompileDaemon", "--build=main.go", "--command=./main"]
-CMD ["CompileDaemon", "--command=./main"]
+# CMD ["CompileDaemon", "--directory=/app", "--command=./main"]
+CMD ["CompileDaemon", "--command=./event-queue"]
 
-# CMD ["./main"]
+# CMD ["./event-queue"]
 
