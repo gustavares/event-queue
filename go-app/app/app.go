@@ -1,60 +1,43 @@
 package app
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gustavares/event-queue/app/api"
+	"github.com/gustavares/event-queue/app/datastore"
 	"github.com/gustavares/event-queue/config"
 )
 
 type App struct {
-	Db     *sql.DB
-	Config *config.Config
+	Datastore *datastore.Datastore
+	Handlers  *api.Handlers
+	Config    *config.Config
 }
 
-func (a *App) Initialize(config *config.Config) error {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		config.Database.User,
-		config.Database.Password,
-		config.Database.Host,
-		config.Database.Port,
-		config.Database.Name,
-	)
-
-	db, err := sql.Open("postgres", connStr)
+func Initialize(c *config.Config) (*App, error) {
+	d, err := datastore.New(c)
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v", err)
+		return nil, err
 	}
 
-	if err := db.Ping(); err != nil {
-		return fmt.Errorf("failed to ping database: %w", err)
-	}
+	h := api.NewHandlers(d)
 
-	return nil
-}
-
-func (a *App) routes() *http.ServeMux {
-	mux := http.NewServeMux()
-
-	// simple health check
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "OK")
-	})
-
-	return mux
+	return &App{
+		Datastore: d,
+		Handlers:  h,
+		Config:    c,
+	}, nil
 }
 
 func (a *App) Run() {
 	log.Println("Server listening on port :8080")
-	log.Fatal(http.ListenAndServe(":8080", a.routes()))
+	log.Fatal(http.ListenAndServe(":8080", a.Handlers.RegisterRoutes()))
 }
 
 func (a *App) Close() {
-	if a.Db != nil {
-		a.Db.Close()
+	if a.Datastore.Db != nil {
+		a.Datastore.Db.Close()
 		log.Println("Database connection closed")
 	}
 }
