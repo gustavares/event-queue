@@ -3,6 +3,7 @@ FROM golang:1.23.4
 WORKDIR /app
 
 RUN go install github.com/githubnemo/CompileDaemon@latest
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.0/migrate.linux-amd64.tar.gz | tar xvz && mv migrate /usr/local/bin/
 
 COPY go.mod go.sum ./
 RUN go mod download

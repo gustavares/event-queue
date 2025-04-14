@@ -39,7 +39,7 @@ func (a *AuthHandler) requestPasscode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "user not found for email: "+rp.Email, http.StatusNotFound)
 		return
 	}
 

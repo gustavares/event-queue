@@ -16,7 +16,7 @@ func main() {
 	defer appInstance.Close()
 
 	// TODO prolly remove this from here or add some cli param to run it
-	runMigrations(appInstance.Datastore.Db, cfg)
+	// runMigrations(appInstance.Datastore.Db, cfg)
 
 	appInstance.Run()
 }

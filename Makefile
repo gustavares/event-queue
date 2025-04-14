@@ -1,49 +1,55 @@
-# Project Variables
-COMPOSE=docker compose
-DB_CONTAINER=postgres-db
-DB_USER=admin
-DB_NAME=localevent
+.PHONY: build up down logs shell install add dev-deps help
 
-# Start the project (Docker Compose)
-up:
-	$(COMPOSE) up --build
+# Variables
+DOCKER_COMPOSE = docker compose
 
-# Stop and remove containers
-down:
-	$(COMPOSE) down
+# Build commands
+build: ## Build the Docker images
+	@echo "Building Docker images..."
+	@$(DOCKER_COMPOSE) build
 
-# Restart the project
-restart:
-	$(COMPOSE) down && $(COMPOSE) up --build
+# Run commands
+up: ## Start all services
+	@echo "Starting all services..."
+	@$(DOCKER_COMPOSE) up
 
-# Access PostgreSQL Database
-db:
-	docker exec -it $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME)
+	# Run commands
+up-w: ## Start all services
+	@echo "Starting all services..."
+	@$(DOCKER_COMPOSE) up --watch
 
-# Show running containers
-ps:
-	docker ps
+up-d: ## Start all services in detached mode
+	@echo "Starting all services in detached mode..."
+	@$(DOCKER_COMPOSE) up -d
 
-# Tail logs from all containers
-logs:
-	$(COMPOSE) logs -f
+# Stop commands
+down: ## Stop all running containers
+	@echo "Stopping containers..."
+	@$(DOCKER_COMPOSE) down
 
-# Tail logs from PostgreSQL container
-db-logs:
-	$(COMPOSE) logs -f $(DB_CONTAINER)
+# Log commands
+logs: ## View logs from all services
+	@$(DOCKER_COMPOSE) logs -f
 
-# Remove all stopped containers, networks, and volumes
-clean:
-	$(COMPOSE) down -v && docker system prune -f
+logs-rn: ## View logs from the React Native app
+	@$(DOCKER_COMPOSE) logs -f rn-app
 
-# Help command to list all available commands
-help:
-	@echo "Available commands:"
-	@echo "  make up         - Start the entire Docker Compose setup"
-	@echo "  make down       - Stop and remove all containers"
-	@echo "  make restart    - Restart all containers"
-	@echo "  make db         - Access PostgreSQL database via docker exec"
-	@echo "  make ps         - Show running containers"
-	@echo "  make logs       - Show logs for all services"
-	@echo "  make db-logs    - Show logs for PostgreSQL"
-	@echo "  make clean      - Remove stopped containers and prune Docker system"
+# Shell commands
+shell-rn: ## Open a shell in the React Native app container
+	@$(DOCKER_COMPOSE) exec rn-app sh
+
+# Package management
+install-rn: ## Install dependencies for the React Native app
+	@$(DOCKER_COMPOSE) exec rn-app pnpm install
+
+add-rn: ## Add a package to the React Native app (usage: make add-rn pkg=PACKAGE_NAME)
+	@$(DOCKER_COMPOSE) exec rn-app pnpm add $(pkg)
+
+add-rn-dev: ## Add a dev package to the React Native app (usage: make add-rn-dev pkg=PACKAGE_NAME)
+	@$(DOCKER_COMPOSE) exec rn-app pnpm add -D $(pkg)
+
+# Help command
+help: ## Display this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.DEFAULT_GOAL := help
