@@ -1,52 +1,44 @@
-.PHONY: build up down logs shell install add dev-deps help
+.PHONY: build up up-w up-d down logs start-rn install-rn add-rn add-rn-dev dev-rn help
 
 # Variables
 DOCKER_COMPOSE = docker compose
 
-# Build commands
-build: ## Build the Docker images
+# Docker commands for backend services
+build: ## Build the Docker images for backend services
 	@echo "Building Docker images..."
 	@$(DOCKER_COMPOSE) build
 
-# Run commands
-up: ## Start all services
-	@echo "Starting all services..."
+up: ## Start all backend services
+	@echo "Starting backend services..."
 	@$(DOCKER_COMPOSE) up
 
-	# Run commands
-up-w: ## Start all services
-	@echo "Starting all services..."
+up-w: ## Start all backend services with watch mode
+	@echo "Starting backend services with watch mode..."
 	@$(DOCKER_COMPOSE) up --watch
 
-up-d: ## Start all services in detached mode
-	@echo "Starting all services in detached mode..."
+up-d: ## Start all backend services in detached mode
+	@echo "Starting backend services in detached mode..."
 	@$(DOCKER_COMPOSE) up -d
 
-# Stop commands
 down: ## Stop all running containers
 	@echo "Stopping containers..."
 	@$(DOCKER_COMPOSE) down
 
-# Log commands
-logs: ## View logs from all services
+logs: ## View logs from all backend services
 	@$(DOCKER_COMPOSE) logs -f
 
-logs-rn: ## View logs from the React Native app
-	@$(DOCKER_COMPOSE) logs -f rn-app
+# React Native local development commands
+start-rn: ## Start the React Native app locally
+	@echo "Starting React Native app locally..."
+	@cd rn-app && pnpm dev
 
-# Shell commands
-shell-rn: ## Open a shell in the React Native app container
-	@$(DOCKER_COMPOSE) exec rn-app sh
+dev-rn: ## Start the React Native app with tunnel option
+	@echo "Starting React Native app with tunnel..."
+	@cd rn-app && pnpm dev -- --tunnel
 
-# Package management
-install-rn: ## Install dependencies for the React Native app
-	@$(DOCKER_COMPOSE) exec rn-app pnpm install
-
-add-rn: ## Add a package to the React Native app (usage: make add-rn pkg=PACKAGE_NAME)
-	@$(DOCKER_COMPOSE) exec rn-app pnpm add $(pkg)
-
-add-rn-dev: ## Add a dev package to the React Native app (usage: make add-rn-dev pkg=PACKAGE_NAME)
-	@$(DOCKER_COMPOSE) exec rn-app pnpm add -D $(pkg)
+clean-rn: ## Clean React Native app cache
+	@echo "Cleaning React Native cache..."
+	@cd rn-app && pnpm cache clean && rm -rf node_modules/.cache
 
 # Help command
 help: ## Display this help message
