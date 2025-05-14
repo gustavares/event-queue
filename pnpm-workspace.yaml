@@ -1,3 +1,4 @@
 packages:
   - 'rn-app'
+  - 'backend'
   # Add other packages as needed
