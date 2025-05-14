@@ -1,3 +1,4 @@
+import { signUp } from '../handlers/auth/signup.handler';
 import { dateTimeScalar } from '../schema/scalars'; // Import the scalar implementation
 
 export const resolvers = {
@@ -7,6 +8,7 @@ export const resolvers = {
     },
 
     Mutation: {
+        signUp
     },
 
     // Type-specific resolvers (Placeholders - can be omitted for now if no complex fields)

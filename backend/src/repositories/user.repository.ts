@@ -1,7 +1,7 @@
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { CreateUserDbInput, UserEntity, UserSchema } from "./user.entity";
 import { user } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { Database } from "../db";
 
 export interface UserRepository {
     create(input: CreateUserDbInput): Promise<UserEntity>;
@@ -16,7 +16,7 @@ function mapToUserEntity(userSchema: UserSchema): UserEntity {
 
 export default class DrizzlePostgresUserRepository implements UserRepository {
     constructor(
-        private db: NodePgDatabase
+        private db: Database
     ) { }
 
     async create({ email, name, passwordHash }: CreateUserDbInput): Promise<UserEntity> {

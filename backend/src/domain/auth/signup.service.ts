@@ -4,7 +4,12 @@ import { hashPassword } from "./common/password.service";
 import { UserEntity } from "../../repositories/user.entity";
 import { generateToken } from "./common/jwt.service";
 
-type SignUpData = {
+export interface SignUpOutput {
+    user: UserEntity;
+    token: string;
+}
+
+export type SignUpData = {
     name: string,
     email: string,
     password: string,

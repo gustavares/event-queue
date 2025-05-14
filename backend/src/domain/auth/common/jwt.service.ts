@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 // TODO: refactor module to receive a config object as dependency
 dotenv.config();
 
-const JWT_SECRET_STRING = process.env.JWT_SECRET;
+const JWT_SECRET_STRING = process.env.JWT_SECRET_STRING;
 
 if (!JWT_SECRET_STRING) {
     console.error("FATAL ERROR: JWT_SECRET is not defined in environment variables.");

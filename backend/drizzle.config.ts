@@ -7,6 +7,7 @@ export default {
     schema: './src/db/schema.ts',
     out: './drizzle',
     dialect: 'postgresql',
+    driver: 'pglite',
     dbCredentials: {
         url: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/event_queue',
     },
