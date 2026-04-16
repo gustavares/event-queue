@@ -7,12 +7,24 @@ import { typeDefs } from './graphql/schema';
 import { resolvers } from './graphql/resolvers';
 import { AppGraphQLContext } from './graphql/graphql.types';
 import DrizzlePostgresUserRepository from './repositories/user.repository';
+import DrizzlePostgresVenueRepository from './repositories/venue.repository';
+import DrizzlePostgresEventRepository from './repositories/event.repository';
+import DrizzlePostgresEventTeamMemberRepository from './repositories/event-team-member.repository';
+import DrizzlePostgresDoorSaleTierRepository from './repositories/door-sale-tier.repository';
 import SignUpService from './domain/auth/signup.service';
+import SignInService from './domain/auth/signin.service';
+import CreateVenueService from './domain/venues/create-venue.service';
+import CreateEventService from './domain/events/create-event.service';
+import UpdateEventService from './domain/events/update-event.service';
+import TransitionEventService from './domain/events/transition-event.service';
+import DeleteEventService from './domain/events/delete-event.service';
+import GetEventsService from './domain/events/get-events.service';
+import ManageTiersService from './domain/events/manage-tiers.service';
+import { verifyToken } from './domain/auth/common/jwt.service';
 
 dotenv.config();
 
 async function startServer() {
-    // Ensure database connection is working before starting
     const connectedToDb = await testConnection();
     if (!connectedToDb) {
         throw new Error('Failed to connect to Database');
@@ -20,15 +32,36 @@ async function startServer() {
 
     const app = express();
 
+    // Repositories
     const userRepository = new DrizzlePostgresUserRepository(db);
-    const signUpService = new SignUpService(userRepository);
-    // const signInService = new SignInService(userRepository, ...); // Example
-    // ... instantiate other services
+    const venueRepository = new DrizzlePostgresVenueRepository(db);
+    const eventRepository = new DrizzlePostgresEventRepository(db);
+    const eventTeamMemberRepository = new DrizzlePostgresEventTeamMemberRepository(db);
+    const doorSaleTierRepository = new DrizzlePostgresDoorSaleTierRepository(db);
 
-    // This object will hold all instantiated services
+    // Services
+    const signUpService = new SignUpService(userRepository);
+    const signInService = new SignInService(userRepository);
+    const createVenueService = new CreateVenueService(venueRepository);
+    const createEventService = new CreateEventService(eventRepository, eventTeamMemberRepository);
+    const updateEventService = new UpdateEventService(eventRepository, eventTeamMemberRepository);
+    const transitionEventService = new TransitionEventService(eventRepository, eventTeamMemberRepository);
+    const deleteEventService = new DeleteEventService(eventRepository, eventTeamMemberRepository);
+    const getEventsService = new GetEventsService(eventRepository, eventTeamMemberRepository);
+    const manageTiersService = new ManageTiersService(doorSaleTierRepository, eventTeamMemberRepository);
+
     const services = {
         signUpService,
-        // signInService,
+        signInService,
+        createVenueService,
+        venueRepository,
+        createEventService,
+        updateEventService,
+        transitionEventService,
+        deleteEventService,
+        getEventsService,
+        manageTiersService,
+        doorSaleTierRepository,
     };
 
     const yoga = createYoga<object, AppGraphQLContext>({
@@ -36,34 +69,34 @@ async function startServer() {
             typeDefs: typeDefs,
             resolvers: resolvers,
         }),
-        // Define context for each request
-        context: async (initialContext) => { // initialContext contains request, params etc.
-            // Here, we add our db instance and instantiated services to the context
-            // This makes `db` and `services` available in every resolver's context argument
+        context: async (initialContext) => {
+            let user = null;
 
-            // Later, you will also handle JWT verification here and add the user to the context
-            // const token = initialContext.request.headers.get('authorization')?.replace('Bearer ', '');
-            // let user = null;
-            // if (token) { user = await verifyTokenAndGetUser(token, db); }
+            const authHeader = initialContext.request.headers.get('authorization');
+            if (authHeader?.startsWith('Bearer ')) {
+                const token = authHeader.slice(7);
+                try {
+                    const payload = await verifyToken(token);
+                    user = await userRepository.findByEmail(payload.email);
+                } catch {
+                    // Invalid/expired token — user stays null, public endpoints still work
+                }
+            }
 
             return {
-                ...initialContext, // Spread the default Yoga context (request, params etc.)
-                db,                // Your Drizzle instance
-                services,          // Your pre-instantiated services
-                // user,           // Authenticated user (null if not authenticated)
+                ...initialContext,
+                db,
+                services,
+                user,
             };
         },
         graphqlEndpoint: '/graphql',
-        graphiql: true, // Enable GraphiQL UI
+        graphiql: true,
     });
 
-    // Apply global middleware
     app.use(cors());
-
-    // Mount GraphQL Yoga middleware
     app.use(yoga.graphqlEndpoint, yoga);
 
-    // Start the Express server
     const PORT = process.env.PORT || 4000;
     app.listen(PORT, () => {
         console.log(`🚀 Server ready at http://localhost:${PORT}${yoga.graphqlEndpoint}`);
