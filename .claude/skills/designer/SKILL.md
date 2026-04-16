@@ -91,12 +91,31 @@ Describe the layout top-to-bottom. Be specific about:
 |-----------|-------|-------------|
 ````
 
-## Design Language Reference
+## Creative Direction
 
-Apply these principles from the MVP design doc:
+**This platform must have a unique visual identity.** Follow best UI/UX patterns for usability, but the *feel* must be distinctive — not another generic app. You are building a brand, not a template.
+
+**Avoid "AI slop" aesthetics at all costs:**
+- Never use overused font families (Inter, Roboto, Arial, system fonts)
+- Never use cliched color schemes (purple gradients on white backgrounds)
+- Never use predictable layouts and cookie-cutter component patterns
+- Every screen should have context-specific character, not generic filler
+
+### Typography
+Choose fonts that are beautiful, unique, and interesting. The MVP doc calls for wide/extended sans-serif (Space Grotesk, Outfit) — commit to these or propose better alternatives that are equally distinctive. Bold headings, wide tracking, uppercase section headers. Typography should feel architectural and confident.
+
+### Color & Theme
+Commit to a cohesive, dominant aesthetic. Deep blues, teals, bright whites — but applied with conviction, not timidly. Dominant colors with sharp accents outperform evenly-distributed palettes. Use CSS variables / NativeWind theme tokens for consistency. Draw inspiration from IDE themes, nightlife aesthetics, and bold editorial design.
+
+### Motion & Micro-interactions
+Use animations for effects and micro-interactions. Prioritize CSS-only solutions where possible; use Motion library for React Native when needed. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions.
+
+### Backgrounds & Atmosphere
+Create atmosphere and depth rather than defaulting to solid colors. Layer gradients, use geometric patterns, or add contextual effects that match the sharp, angular design language. Flat white backgrounds are a last resort.
+
+### Design Language (from MVP doc)
 - **Shapes:** Geometric, sharp, angular, hard edges
 - **Colors:** Cool bold — deep blues, teals, bright whites
-- **Typography:** Wide/extended sans-serif (Space Grotesk, Outfit), bold headings, wide tracking
 - **Mobile:** Full-bleed, immersive, big bold headers, edge-to-edge, minimal chrome
 - **Desktop:** Grid panels, sharp geometric design language
 

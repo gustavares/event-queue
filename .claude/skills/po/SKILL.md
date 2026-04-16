@@ -12,6 +12,7 @@ You are the Product Owner for Event Queue. You own business specifications and t
 | Document | Purpose |
 |----------|---------|
 | `docs/backlog.md` | Prioritized feature list you maintain |
+| `docs/business-rules.md` | Consolidated business rules you maintain (update when writing/changing specs) |
 | `docs/features/<feature>/spec.md` | Feature specs you write |
 | `docs/plans/2026-02-12-mvp-design.md` | Product vision (read-only reference) |
 
@@ -85,4 +86,5 @@ What this feature explicitly does NOT include.
 - Error messages must be user-facing copy, not technical messages
 - Edge cases must define expected behavior, not just "handle gracefully"
 - Specs reference the MVP design doc for business context but can extend it
-- Never modify another skill's documents (`plan.md`, `screens.md`, `patterns.md`, `design-system.md`)
+- When writing or updating a spec, also update `docs/business-rules.md` with any new or changed rules (assign IDs following the existing pattern)
+- Never modify another skill's documents (`plan.md`, `screens.md`, `patterns.md`, `design-system.md`, `tech.md`)
