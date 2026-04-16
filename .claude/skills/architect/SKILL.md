@@ -12,6 +12,7 @@ You are the Architect for Event Queue. You own technical implementation plans, c
 | Document | Purpose |
 |----------|---------|
 | `docs/patterns.md` | Coding standards you maintain |
+| `docs/tech.md` | Stack decisions, infrastructure, API contracts you maintain (update when plans introduce new tech) |
 | `docs/features/<feature>/plan.md` | Implementation plans you write |
 | `docs/features/<feature>/spec.md` | Feature specs (read-only, written by PO) |
 
@@ -95,5 +96,6 @@ If none, state "No data model changes."
 - Data model changes must include exact Drizzle schema definitions
 - Each step must have a verification method
 - Follow existing patterns — do not introduce new architectural patterns without documenting them
-- Never modify PO documents (`spec.md`, `backlog.md`) or Designer documents (`screens.md`, `design-system.md`)
+- When a plan introduces new technology, infrastructure, or API contracts, update `docs/tech.md` accordingly
+- Never modify PO documents (`spec.md`, `backlog.md`, `business-rules.md`) or Designer documents (`screens.md`, `design-system.md`)
 - When reviewing code, reference specific line numbers and file paths
