@@ -28,70 +28,39 @@ export const typeDefs = gql`
     id: ID!
     email: String!
     name: String!
-    managedEvents: [Event!]
-    promotedEvents: [Event!]
-    hostedEvents: [Event!]
   }
 
   type Venue {
     id: ID!
     name: String!
     address: String!
-    events: [Event!]
+    capacity: Int
+    createdAt: DateTime!
   }
 
   type Event {
     id: ID!
     name: String!
-    date: DateTime!
-    venue: Venue!
     description: String
+    startDate: DateTime!
+    endDate: DateTime!
     status: EventStatus!
+    venue: Venue
+    locationName: String
+    locationAddress: String
+    doorSalesEnabled: Boolean!
+    doorSaleTiers: [DoorSaleTier!]!
     createdBy: User!
     createdAt: DateTime!
-    lists: [GuestList!]!
-    team: [EventTeamMember!]!
+    updatedAt: DateTime!
   }
 
-  type GuestList {
+  type DoorSaleTier {
     id: ID!
     name: String!
-    event: Event!
-    entryValue: Float!
-    createdBy: User!
+    price: Float!
+    eventId: ID!
     createdAt: DateTime!
-    isPublic: Boolean!
-    promoters: [User!]!
-    guestEntries: [GuestListEntry!]!
-  }
-
-  type Guest {
-    id: ID!
-    firstName: String!
-    lastName: String!
-    email: String
-    phone: String
-    lists: [GuestList!]!
-    addedBy: User
-    checkInStatus: CheckInStatus!
-    checkInTimestamp: DateTime
-    notes: String
-  }
-
-  type GuestListEntry {
-    id: ID!
-    guestList: GuestList!
-    guest: Guest!
-    checkInStatus: CheckInStatus!
-    checkInTimestamp: DateTime
-    addedBy: User!
-    createdAt: DateTime!
-  }
-
-  type EventTeamMember {
-    user: User!
-    event: Event!
-    role: UserRole!
   }
 
   type AuthPayload {
@@ -111,80 +80,67 @@ export const typeDefs = gql`
     password: String!
   }
 
-  input VenueInput {
+  input CreateVenueInput {
     name: String!
     address: String!
+    capacity: Int
   }
 
   input CreateEventInput {
     name: String!
-    date: DateTime!
-    venueId: ID
-    newVenue: VenueInput
     description: String
-    status: EventStatus
+    startDate: DateTime!
+    endDate: DateTime
+    venueId: ID
+    locationName: String
+    locationAddress: String
+    doorSalesEnabled: Boolean
   }
 
   input UpdateEventInput {
     name: String
-    date: DateTime
-    venueId: ID
     description: String
-    status: EventStatus
+    startDate: DateTime
+    endDate: DateTime
+    venueId: ID
+    locationName: String
+    locationAddress: String
+    doorSalesEnabled: Boolean
   }
 
-  input CreateGuestListInput {
+  input DoorSaleTierInput {
     name: String!
-    eventId: ID!
-    entryValue: Float!
-    isPublic: Boolean!
+    price: Float!
   }
 
-  input AddGuestInput {
-    firstName: String!
-    lastName: String!
-    email: String
-    phone: String
-    listId: ID!
-    notes: String
-  }
-
-  input CheckInGuestInput {
-    guestListEntryId: ID!
+  input UpdateDoorSaleTierInput {
+    name: String
+    price: Float
   }
 
   # Queries
   type Query {
     me: User
     event(id: ID!): Event
-    events: [Event!]!
+    myEvents: [Event!]!
     venues: [Venue!]!
     venue(id: ID!): Venue
-    guestList(id: ID!): GuestList
-    guest(id: ID!): Guest
   }
 
   # Mutations
   type Mutation {
     signUp(input: SignUpInput!): AuthPayload!
     signIn(input: SignInInput!): AuthPayload!
-    
-    createVenue(input: VenueInput!): Venue!
-    updateVenue(id: ID!, input: VenueInput!): Venue!
-    
+
+    createVenue(input: CreateVenueInput!): Venue!
+
     createEvent(input: CreateEventInput!): Event!
     updateEvent(id: ID!, input: UpdateEventInput!): Event!
     deleteEvent(id: ID!): Boolean!
-    
-    createGuestList(input: CreateGuestListInput!): GuestList!
-    deleteGuestList(id: ID!): Boolean!
-    
-    addGuest(input: AddGuestInput!): GuestListEntry!
-    removeGuestFromList(guestListEntryId: ID!): Boolean!
-    
-    checkInGuest(input: CheckInGuestInput!): GuestListEntry!
-    
-    addTeamMember(eventId: ID!, userId: ID!, role: UserRole!): EventTeamMember!
-    removeTeamMember(eventId: ID!, userId: ID!): Boolean!
+    transitionEventStatus(id: ID!, status: EventStatus!): Event!
+
+    addDoorSaleTier(eventId: ID!, input: DoorSaleTierInput!): DoorSaleTier!
+    updateDoorSaleTier(id: ID!, input: UpdateDoorSaleTierInput!): DoorSaleTier!
+    removeDoorSaleTier(id: ID!): Boolean!
   }
 `;
