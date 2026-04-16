@@ -8,8 +8,11 @@ import { Platform } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '@rn-primitives/portal';
-import { ThemeToggle } from '~/components/ThemeToggle';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
+import { GraphQLProvider } from '~/lib/graphql/provider';
+import { useAuthStore } from '~/stores/auth.store';
+import { useAuthGate } from '~/hooks/useAuthGate';
+import { useRestoreSession } from '~/hooks/useRestoreSession';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -21,7 +24,6 @@ const DARK_THEME: Theme = {
 };
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
@@ -36,7 +38,6 @@ export default function RootLayout() {
     }
 
     if (Platform.OS === 'web') {
-      // Adds the background color to the html element to prevent white background on overscroll.
       document.documentElement.classList.add('bg-background');
     }
     setAndroidNavigationBar(colorScheme);
@@ -49,19 +50,36 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-      <Stack>
-        <Stack.Screen
-          name='index'
-          options={{
-            title: 'Starter Base',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+    <GraphQLProvider>
+      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+        <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+        <AuthGatedStack />
+        <PortalHost />
+      </ThemeProvider>
+    </GraphQLProvider>
+  );
+}
+
+function AuthGatedStack() {
+  const { isLoading, restoreToken } = useAuthStore();
+
+  React.useEffect(() => {
+    restoreToken();
+  }, []);
+
+  useRestoreSession();
+  useAuthGate();
+
+  if (isLoading) {
+    return null;
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='index' />
+      <Stack.Screen name='(auth)' />
+      <Stack.Screen name='(app)' />
+    </Stack>
   );
 }
 
