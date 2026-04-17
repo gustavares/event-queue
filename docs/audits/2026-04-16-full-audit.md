@@ -1,20 +1,22 @@
 # Full Project Audit — 2026-04-16
 
-**Status:** In progress
+**Status:** Complete
 **Design:** [docs/superpowers/specs/2026-04-16-full-audit-design.md](../superpowers/specs/2026-04-16-full-audit-design.md)
 **Plan:** [docs/superpowers/plans/2026-04-16-full-audit.md](../superpowers/plans/2026-04-16-full-audit.md)
 
 ## Executive Summary
 
-_Populated in Task 8 after all findings are collected._
-
-- 🔴 Critical: —
-- 🟡 Important: —
-- 🟢 Nice-to-have: —
+- 🔴 Critical: 18
+- 🟡 Important: 65
+- 🟢 Nice-to-have: 23
 
 ### Top takeaways
 
-_Populated in Task 8._
+1. Events CRUD mobile client is partially non-functional: Publish / Close / Cancel / Reopen, `deleteEvent`, and both tier-edit mutations all pass the wrong variable name (`eventId`/`tierId` instead of `id`), so 4 status transitions + 2 tier operations silently fail on the client — and untyped urql operations masked every one of them.
+2. `patterns.md` silence is the root cause of drift in both features — missing sections on error handling, transactions, validation-failure shape, exports, auth guards, database conventions, component extraction, and frontend typing — so per-feature fixes will re-introduce the drift on the next feature unless the doc is reconciled in one pass.
+3. `design-system.md` documents a custom palette (and Space Grotesk) that does not exist in `tailwind.config.js` / `global.css`, and components hardcode hex values — the Stitch UI redesign would be designing against stale specs unless tokens are reconciled first.
+4. `tech.md` lists `JWT_SECRET` but the code reads `JWT_SECRET_STRING` and `process.exit(1)`s on mismatch, `backlog.md` still labels Events CRUD as IN PROGRESS, and Drizzle workflow is `pnpm db:generate`/`db:migrate` (not `drizzle-kit push`) — three small doc fixes that unblock every new dev's first hour.
+5. Non-transactional event+manager creation can orphan events, disabling door sales deletes all tiers (contradicting BR-14), and authentication failures never carry `extensions.code='UNAUTHENTICATED'` so the urql `didAuthError` check never fires — three 🔴 backend correctness bugs that each need a domain-level fix, not just a client patch.
 
 ## Findings
 
