@@ -64,13 +64,13 @@ export default function EventDetailScreen() {
     const event = data?.event;
 
     const handleTransition = async (toStatus: EventStatus) => {
-        await transitionStatus({ eventId: id, status: toStatus });
+        await transitionStatus({ id, status: toStatus });
         reExecute({ requestPolicy: 'network-only' });
         setConfirmDialog({ visible: false, type: null });
     };
 
     const handleDelete = async () => {
-        await deleteEvent({ eventId: id });
+        await deleteEvent({ id });
         router.replace('/(app)');
     };
 
