@@ -183,7 +183,7 @@ export default function EditEventScreen() {
             input.locationAddress = locationAddress.trim() || undefined;
         }
 
-        const result = await updateEvent({ eventId: id, input });
+        const result = await updateEvent({ id, input });
         if (result.error || !result.data?.updateEvent) {
             setSubmitting(false);
             return;
@@ -203,7 +203,7 @@ export default function EditEventScreen() {
             // Remove deleted tiers
             for (const orig of originalTiers) {
                 if (!currentIds.has(orig.id)) {
-                    await removeTier({ tierId: orig.id });
+                    await removeTier({ id: orig.id });
                 }
             }
 
@@ -211,7 +211,7 @@ export default function EditEventScreen() {
                 if (!tier.name.trim() || !tier.price.trim()) continue;
                 if (tier.id && originalIds.has(tier.id)) {
                     await updateTierMutation({
-                        tierId: tier.id,
+                        id: tier.id,
                         input: { name: tier.name.trim(), price: parseFloat(tier.price) },
                     });
                 } else {
@@ -225,7 +225,7 @@ export default function EditEventScreen() {
             // Remove all tiers if door sales disabled
             const originalTiers = eventData?.event?.doorSaleTiers ?? [];
             for (const tier of originalTiers) {
-                await removeTier({ tierId: tier.id });
+                await removeTier({ id: tier.id });
             }
         }
 
