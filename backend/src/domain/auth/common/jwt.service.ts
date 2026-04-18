@@ -4,14 +4,14 @@ import dotenv from 'dotenv';
 // TODO: refactor module to receive a config object as dependency
 dotenv.config();
 
-const JWT_SECRET_STRING = process.env.JWT_SECRET_STRING;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!JWT_SECRET_STRING) {
+if (!JWT_SECRET) {
     console.error("FATAL ERROR: JWT_SECRET is not defined in environment variables.");
     process.exit(1); // TODO: throw error for app init
 }
 
-const secretKey = new TextEncoder().encode(JWT_SECRET_STRING);
+const secretKey = new TextEncoder().encode(JWT_SECRET);
 
 export interface UserJWTPayload extends JWTPayload {
     userId: string;
