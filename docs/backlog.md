@@ -13,7 +13,7 @@
 | # | Feature | Status | Dependencies | Spec |
 |---|---------|--------|--------------|------|
 | 1 | Auth (Sign Up / Sign In) | 🟢 DONE | — | [spec](features/auth/spec.md) |
-| 2 | Events CRUD (incl. Venues) | 🔵 IN PROGRESS | Auth | [spec](features/events-crud/spec.md) |
+| 2 | Events CRUD (incl. Venues) | 🟢 DONE | Auth | [spec](features/events-crud/spec.md) — see [audit](../audits/2026-04-16-full-audit.md) for known defects |
 | 3 | Event Team Management | 💡 IDEA | Events | — |
 | 4 | Lists & Guests | 💡 IDEA | Events, Teams | — |
 | 5 | Check-in Flow | 💡 IDEA | Lists & Guests | — |
