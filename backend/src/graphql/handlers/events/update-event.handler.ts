@@ -1,4 +1,5 @@
 import type { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 export async function updateEvent(
     _parent: unknown,
@@ -17,14 +18,14 @@ export async function updateEvent(
     },
     context: AppGraphQLContext
 ) {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     try {
         const { name, description, startDate, endDate, venueId, locationName, locationAddress, doorSalesEnabled } = args.input;
 
         return await context.services.updateEventService.run({
             eventId: args.id,
-            userId: context.user.id,
+            userId: user.id,
             name,
             description,
             startDate,

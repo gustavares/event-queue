@@ -1,4 +1,5 @@
 import type { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 export async function createEvent(
     _parent: unknown,
@@ -16,7 +17,7 @@ export async function createEvent(
     },
     context: AppGraphQLContext
 ) {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     try {
         const { name, description, startDate, endDate, venueId, locationName, locationAddress, doorSalesEnabled } = args.input;
@@ -30,7 +31,7 @@ export async function createEvent(
             locationName,
             locationAddress,
             doorSalesEnabled,
-            userId: context.user.id,
+            userId: user.id,
         });
     } catch (error) {
         console.error("createEvent handler error:", error);

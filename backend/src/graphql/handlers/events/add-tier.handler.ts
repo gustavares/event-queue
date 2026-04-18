@@ -1,16 +1,17 @@
 import { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 export async function addDoorSaleTier(
     _parent: unknown,
     args: { eventId: string; input: { name: string; price: number } },
     context: AppGraphQLContext,
 ) {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     try {
         return await context.services.manageTiersService.addTier(
             args.eventId,
-            context.user.id,
+            user.id,
             args.input,
         );
     } catch (error) {

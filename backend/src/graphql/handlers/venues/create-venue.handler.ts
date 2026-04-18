@@ -1,6 +1,7 @@
 import { CreateVenueData } from "../../../domain/venues/create-venue.service";
 import { VenueEntity } from "../../../repositories/venue.entity";
 import { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 interface GraphQLCreateVenueInput {
     name: string;
@@ -13,11 +14,11 @@ export async function createVenue(
     args: { input: GraphQLCreateVenueInput },
     context: AppGraphQLContext
 ): Promise<VenueEntity> {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     const { name, address, capacity } = args.input;
     const { createVenueService } = context.services;
-    const serviceInput: CreateVenueData = { name, address, capacity, userId: context.user.id };
+    const serviceInput: CreateVenueData = { name, address, capacity, userId: user.id };
 
     try {
         const result = await createVenueService.run(serviceInput);
