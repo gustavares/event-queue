@@ -2,6 +2,9 @@ import { z } from "zod";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
 import type { EventEntity } from "../../repositories/event.entity";
+import type { Database } from "../../db";
+import DrizzlePostgresEventRepository from "../../repositories/event.repository";
+import DrizzlePostgresEventTeamMemberRepository from "../../repositories/event-team-member.repository";
 
 export interface CreateEventData {
     name: string;
@@ -43,6 +46,7 @@ const schema = z
 
 export default class CreateEventService {
     constructor(
+        private readonly db: Database,
         private readonly eventRepository: EventRepository,
         private readonly eventTeamMemberRepository: EventTeamMemberRepository
     ) {}
@@ -51,28 +55,32 @@ export default class CreateEventService {
         const validated = schema.parse(input);
 
         const endDate = validated.endDate ?? new Date(validated.startDate.getTime() + 12 * 60 * 60 * 1000);
-
         const locationName = validated.venueId ? undefined : validated.locationName;
         const locationAddress = validated.venueId ? undefined : validated.locationAddress;
 
-        const event = await this.eventRepository.create({
-            name: validated.name,
-            description: validated.description,
-            startDate: validated.startDate,
-            endDate,
-            venueId: validated.venueId,
-            locationName,
-            locationAddress,
-            doorSalesEnabled: validated.doorSalesEnabled,
-            createdBy: validated.userId,
-        });
+        return await this.db.transaction(async (tx) => {
+            const txEventRepo = new DrizzlePostgresEventRepository(tx);
+            const txTeamRepo = new DrizzlePostgresEventTeamMemberRepository(tx);
 
-        await this.eventTeamMemberRepository.create({
-            eventId: event.id,
-            userId: validated.userId,
-            role: "MANAGER",
-        });
+            const event = await txEventRepo.create({
+                name: validated.name,
+                description: validated.description,
+                startDate: validated.startDate,
+                endDate,
+                venueId: validated.venueId,
+                locationName,
+                locationAddress,
+                doorSalesEnabled: validated.doorSalesEnabled,
+                createdBy: validated.userId,
+            });
 
-        return event;
+            await txTeamRepo.create({
+                eventId: event.id,
+                userId: validated.userId,
+                role: "MANAGER",
+            });
+
+            return event;
+        });
     }
 }
