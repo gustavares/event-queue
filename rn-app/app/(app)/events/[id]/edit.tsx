@@ -173,6 +173,7 @@ export default function EditEventScreen() {
             description: description.trim() || undefined,
             startDate: startISO,
             endDate: endISO || undefined,
+            doorSalesEnabled,
         };
 
         if (locationMode === 'venue' && selectedVenue) {
@@ -220,12 +221,6 @@ export default function EditEventScreen() {
                         input: { name: tier.name.trim(), price: parseFloat(tier.price) },
                     });
                 }
-            }
-        } else {
-            // Remove all tiers if door sales disabled
-            const originalTiers = eventData?.event?.doorSaleTiers ?? [];
-            for (const tier of originalTiers) {
-                await removeTier({ id: tier.id });
             }
         }
 
