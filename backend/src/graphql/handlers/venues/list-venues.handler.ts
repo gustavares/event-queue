@@ -1,12 +1,13 @@
 import { VenueEntity } from "../../../repositories/venue.entity";
 import { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 export async function listVenues(
     _parent: any,
     _args: any,
     context: AppGraphQLContext
 ): Promise<VenueEntity[]> {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     const { venueRepository } = context.services;
 

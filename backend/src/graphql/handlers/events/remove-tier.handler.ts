@@ -1,14 +1,15 @@
 import { AppGraphQLContext } from "../../graphql.types";
+import { requireAuth } from "../common/require-auth";
 
 export async function removeDoorSaleTier(
     _parent: unknown,
     args: { id: string },
     context: AppGraphQLContext,
 ) {
-    if (!context.user) throw new Error("Authentication required");
+    const user = requireAuth(context);
 
     try {
-        await context.services.manageTiersService.removeTier(args.id, context.user.id);
+        await context.services.manageTiersService.removeTier(args.id, user.id);
         return true;
     } catch (error) {
         console.error("removeDoorSaleTier error:", error);
