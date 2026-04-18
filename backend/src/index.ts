@@ -43,7 +43,7 @@ async function startServer() {
     const signUpService = new SignUpService(userRepository);
     const signInService = new SignInService(userRepository);
     const createVenueService = new CreateVenueService(venueRepository);
-    const createEventService = new CreateEventService(eventRepository, eventTeamMemberRepository);
+    const createEventService = new CreateEventService(db, eventRepository, eventTeamMemberRepository);
     const updateEventService = new UpdateEventService(eventRepository, eventTeamMemberRepository);
     const transitionEventService = new TransitionEventService(eventRepository, eventTeamMemberRepository);
     const deleteEventService = new DeleteEventService(eventRepository, eventTeamMemberRepository);
