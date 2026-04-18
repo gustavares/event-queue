@@ -79,7 +79,7 @@ export default function EventDetailScreen() {
         if (t === 'cancel') await handleTransition('CANCELLED');
         else if (t === 'publish') await handleTransition('ACTIVE');
         else if (t === 'close') await handleTransition('FINISHED');
-        else if (t === 'reopen') await handleTransition('DRAFT');
+        else if (t === 'reopen') await handleTransition('ACTIVE');
         else if (t === 'delete') await handleDelete();
     };
 
@@ -116,7 +116,7 @@ export default function EventDetailScreen() {
             case 'reopen':
                 return {
                     title: 'Reopen Event?',
-                    message: 'The event will be moved back to draft status.',
+                    message: 'The event will be reactivated.',
                     confirmLabel: 'Reopen',
                     destructive: false,
                 };
