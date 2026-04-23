@@ -1,2 +1,19 @@
 .env
 node_modules
+
+# Claude Code — local state that must never be committed
+.claude/.credentials.json
+.claude/sessions/
+.claude/history.jsonl
+.claude/cache/
+.claude/file-history/
+.claude/session-env/
+.claude/shell-snapshots/
+.claude/paste-cache/
+.claude/backups/
+.claude/debug/
+.claude/downloads/
+.claude/mcp-needs-auth-cache.json
+
+# Claude Code — per-user transient state that shouldn't be shared
+.claude/plans/
