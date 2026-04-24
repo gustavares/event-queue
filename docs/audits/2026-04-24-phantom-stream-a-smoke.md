@@ -114,7 +114,9 @@ Phantom's answers to the three smoke questions were spot-checked against `/home/
 ## Costs and budget
 
 - Starting Anthropic credit: $50.00
-- At-end remaining: (to be filled after Phantom session ends — pull from Anthropic console)
-- Approximate cost of Stream A: (to be filled)
+- At-end remaining: $46.10
+- Approximate cost of Stream A: **$3.90**
 
-Sonnet 4.6 at `effort: max` with the 9-file synthesis and the consolidated Tasks-8+9 prompt used substantially more than a single trivial turn. For Stream C, consider dropping to `effort: medium` by default and reserving `max` for specific synthesis tasks.
+Breakdown (rough): ~$0.66 up through role-priming + clone + docs-read summary; ~$3.24 for the consolidated Tasks-8+9 prompt (pnpm install failure + network diagnosis + backend boot + GraphQL introspection + three architecture answers, all at `effort: max` with heavy Read usage).
+
+Sonnet 4.6 at `effort: max` on a multi-file synthesis and a consolidated multi-step prompt burns noticeably. For Stream C, drop to `effort: medium` by default and reserve `max` for specific synthesis tasks. Budget ~$5 per Stream A equivalent if you rerun this from scratch on a VM.
