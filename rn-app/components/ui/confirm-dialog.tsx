@@ -30,16 +30,16 @@ export function ConfirmDialog({
       onRequestClose={onCancel}
     >
       <View className="flex-1 items-center justify-center bg-black/50 px-6">
-        <View className="w-full rounded-[4px] border border-white/10 bg-[#1a1a2e] p-6">
-          <Text className="mb-3 text-[18px] font-bold text-white">{title}</Text>
-          <Text className="mb-6 text-[14px] text-[#64748b]">{message}</Text>
+        <View className="w-full rounded-[4px] border border-white/10 bg-background p-6">
+          <Text className="mb-3 text-[18px] font-bold text-foreground">{title}</Text>
+          <Text className="mb-6 text-[14px] text-muted-foreground">{message}</Text>
 
           <View className="flex-row gap-3">
             <Pressable
               onPress={onCancel}
-              className="flex-1 items-center justify-center rounded-[4px] border border-[#64748b] py-3"
+              className="flex-1 items-center justify-center rounded-[4px] border border-muted-foreground py-3"
             >
-              <Text className="text-[13px] font-bold uppercase tracking-wide text-[#64748b]">
+              <Text className="text-[13px] font-bold uppercase tracking-wide text-muted-foreground">
                 Cancel
               </Text>
             </Pressable>
@@ -48,10 +48,10 @@ export function ConfirmDialog({
               onPress={onConfirm}
               className={cn(
                 'flex-1 items-center justify-center rounded-[4px] py-3',
-                destructive ? 'bg-[#dc2626]' : 'bg-[#00838f]'
+                destructive ? 'bg-destructive' : 'bg-primary'
               )}
             >
-              <Text className="text-[13px] font-bold uppercase tracking-wide text-white">
+              <Text className="text-[13px] font-bold uppercase tracking-wide text-primary-foreground">
                 {confirmLabel}
               </Text>
             </Pressable>

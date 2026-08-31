@@ -42,7 +42,7 @@ export function TierRow({
         className="h-11 w-11 items-center justify-center"
         hitSlop={8}
       >
-        <Text className="text-[16px] font-bold text-[#dc2626]">✕</Text>
+        <Text className="text-[16px] font-bold text-destructive">✕</Text>
       </Pressable>
     </View>
   );

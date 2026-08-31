@@ -127,18 +127,18 @@ export default function EventDetailScreen() {
 
     if (fetching && !event) {
         return (
-            <SafeAreaView className='flex-1 bg-[#1a1a2e] items-center justify-center'>
-                <Text className='text-[#64748b]'>Loading...</Text>
+            <SafeAreaView className='flex-1 bg-background items-center justify-center'>
+                <Text className='text-muted-foreground'>Loading...</Text>
             </SafeAreaView>
         );
     }
 
     if (!event) {
         return (
-            <SafeAreaView className='flex-1 bg-[#1a1a2e] items-center justify-center'>
-                <Text className='text-[#64748b]'>Event not found.</Text>
+            <SafeAreaView className='flex-1 bg-background items-center justify-center'>
+                <Text className='text-muted-foreground'>Event not found.</Text>
                 <Pressable onPress={() => router.back()} className='mt-4'>
-                    <Text className='text-[#00838f]'>Go back</Text>
+                    <Text className='text-primary'>Go back</Text>
                 </Pressable>
             </SafeAreaView>
         );
@@ -148,7 +148,7 @@ export default function EventDetailScreen() {
     const dp = dialogProps();
 
     return (
-        <SafeAreaView className='flex-1 bg-[#1a1a2e]'>
+        <SafeAreaView className='flex-1 bg-background'>
             <ScrollView
                 className='flex-1'
                 contentContainerStyle={{ paddingBottom: 160 }}
@@ -156,14 +156,14 @@ export default function EventDetailScreen() {
                 {/* Header */}
                 <View className='flex-row items-center justify-between px-6 pt-4 pb-4'>
                     <Pressable onPress={() => router.back()}>
-                        <Text className='text-[24px] text-[#64748b]'>←</Text>
+                        <Text className='text-[24px] text-muted-foreground'>←</Text>
                     </Pressable>
                     <StatusBadge status={status} />
                 </View>
 
                 {/* Title */}
                 <View className='px-6 mb-2'>
-                    <Text className='text-[28px] font-bold text-white leading-tight'>
+                    <Text className='text-[28px] font-bold text-foreground leading-tight'>
                         {event.name}
                     </Text>
                 </View>
@@ -171,7 +171,7 @@ export default function EventDetailScreen() {
                 {/* Date */}
                 {event.startDate && (
                     <View className='px-6 mb-6'>
-                        <Text className='text-[14px] text-[#64748b]'>
+                        <Text className='text-[14px] text-muted-foreground'>
                             {formatDateRange(event.startDate, event.endDate)}
                         </Text>
                     </View>
@@ -182,11 +182,11 @@ export default function EventDetailScreen() {
                     <View className='px-6 mb-6'>
                         <SectionHeader title='LOCATION' />
                         <View className='mt-3'>
-                            <Text className='text-white text-[15px] font-medium'>
+                            <Text className='text-foreground text-[15px] font-medium'>
                                 {event.venue?.name ?? event.locationName}
                             </Text>
                             {(event.venue?.address || event.locationAddress) && (
-                                <Text className='text-[#64748b] text-[13px] mt-0.5'>
+                                <Text className='text-muted-foreground text-[13px] mt-0.5'>
                                     {event.venue?.address ?? event.locationAddress}
                                 </Text>
                             )}
@@ -198,7 +198,7 @@ export default function EventDetailScreen() {
                 {event.description && (
                     <View className='px-6 mb-6'>
                         <SectionHeader title='ABOUT' />
-                        <Text className='text-[#94a3b8] text-[14px] leading-relaxed mt-3'>
+                        <Text className='text-muted-foreground text-[14px] leading-relaxed mt-3'>
                             {event.description}
                         </Text>
                     </View>
@@ -214,37 +214,37 @@ export default function EventDetailScreen() {
                                     key={tier.id}
                                     className='flex-row items-center justify-between border border-white/10 rounded-[4px] px-4 py-3'
                                 >
-                                    <Text className='text-white text-[14px]'>{tier.name}</Text>
-                                    <Text className='text-[#00838f] text-[14px] font-bold'>
+                                    <Text className='text-foreground text-[14px]'>{tier.name}</Text>
+                                    <Text className='text-primary text-[14px] font-bold'>
                                         R$ {Number(tier.price).toFixed(2)}
                                     </Text>
                                 </View>
                             ))}
                         </View>
                     ) : (
-                        <Text className='text-[#64748b] text-[14px] mt-3'>Not enabled</Text>
+                        <Text className='text-muted-foreground text-[14px] mt-3'>Not enabled</Text>
                     )}
                 </View>
             </ScrollView>
 
             {/* Bottom action bar */}
-            <View className='absolute bottom-0 left-0 right-0 bg-[#1a1a2e] border-t border-white/10 px-6 pt-4 pb-8'>
+            <View className='absolute bottom-0 left-0 right-0 bg-background border-t border-white/10 px-6 pt-4 pb-8'>
                 {status === 'DRAFT' && (
                     <>
                         <View className='flex-row gap-3 mb-3'>
                             <Pressable
                                 onPress={() => router.push(`/(app)/events/${id}/edit` as any)}
-                                className='flex-1 h-12 border border-[#64748b] rounded-[4px] items-center justify-center'
+                                className='flex-1 h-12 border border-muted-foreground rounded-[4px] items-center justify-center'
                             >
-                                <Text className='text-[#64748b] text-[13px] uppercase font-bold tracking-wide'>
+                                <Text className='text-muted-foreground text-[13px] uppercase font-bold tracking-wide'>
                                     Edit
                                 </Text>
                             </Pressable>
                             <Pressable
                                 onPress={() => setConfirmDialog({ visible: true, type: 'publish' })}
-                                className='flex-1 h-12 bg-[#00838f] rounded-[4px] items-center justify-center'
+                                className='flex-1 h-12 bg-primary rounded-[4px] items-center justify-center'
                             >
-                                <Text className='text-white text-[13px] uppercase font-bold tracking-wide'>
+                                <Text className='text-primary-foreground text-[13px] uppercase font-bold tracking-wide'>
                                     Publish
                                 </Text>
                             </Pressable>
@@ -256,7 +256,7 @@ export default function EventDetailScreen() {
                                 </Text>
                             </Pressable>
                             <Pressable onPress={() => setConfirmDialog({ visible: true, type: 'delete' })}>
-                                <Text className='text-[#64748b] text-[12px] uppercase font-bold tracking-wide'>
+                                <Text className='text-muted-foreground text-[12px] uppercase font-bold tracking-wide'>
                                     Delete
                                 </Text>
                             </Pressable>
@@ -269,17 +269,17 @@ export default function EventDetailScreen() {
                         <View className='flex-row gap-3 mb-3'>
                             <Pressable
                                 onPress={() => router.push(`/(app)/events/${id}/edit` as any)}
-                                className='flex-1 h-12 border border-[#64748b] rounded-[4px] items-center justify-center'
+                                className='flex-1 h-12 border border-muted-foreground rounded-[4px] items-center justify-center'
                             >
-                                <Text className='text-[#64748b] text-[13px] uppercase font-bold tracking-wide'>
+                                <Text className='text-muted-foreground text-[13px] uppercase font-bold tracking-wide'>
                                     Edit
                                 </Text>
                             </Pressable>
                             <Pressable
                                 onPress={() => setConfirmDialog({ visible: true, type: 'close' })}
-                                className='flex-1 h-12 bg-[#1e40af] rounded-[4px] items-center justify-center'
+                                className='flex-1 h-12 bg-primary rounded-[4px] items-center justify-center'
                             >
-                                <Text className='text-white text-[13px] uppercase font-bold tracking-wide'>
+                                <Text className='text-primary-foreground text-[13px] uppercase font-bold tracking-wide'>
                                     Close Event
                                 </Text>
                             </Pressable>
@@ -298,15 +298,15 @@ export default function EventDetailScreen() {
                     <>
                         <Pressable
                             onPress={() => setConfirmDialog({ visible: true, type: 'reopen' })}
-                            className='h-12 border border-[#64748b] rounded-[4px] items-center justify-center mb-3'
+                            className='h-12 border border-muted-foreground rounded-[4px] items-center justify-center mb-3'
                         >
-                            <Text className='text-[#64748b] text-[13px] uppercase font-bold tracking-wide'>
+                            <Text className='text-muted-foreground text-[13px] uppercase font-bold tracking-wide'>
                                 Reopen Event
                             </Text>
                         </Pressable>
                         <View className='items-center'>
                             <Pressable onPress={() => setConfirmDialog({ visible: true, type: 'delete' })}>
-                                <Text className='text-[#64748b] text-[12px] uppercase font-bold tracking-wide'>
+                                <Text className='text-muted-foreground text-[12px] uppercase font-bold tracking-wide'>
                                     Delete
                                 </Text>
                             </Pressable>
@@ -317,7 +317,7 @@ export default function EventDetailScreen() {
                 {status === 'CANCELLED' && (
                     <View className='items-center'>
                         <Pressable onPress={() => setConfirmDialog({ visible: true, type: 'delete' })}>
-                            <Text className='text-[#64748b] text-[12px] uppercase font-bold tracking-wide'>
+                            <Text className='text-muted-foreground text-[12px] uppercase font-bold tracking-wide'>
                                 Delete
                             </Text>
                         </Pressable>

@@ -24,8 +24,8 @@ export function ToggleGroup({ options, selected, onChange }: ToggleGroupProps) {
             className={cn(
               'flex-1 items-center justify-center',
               isActive
-                ? 'bg-[#00838f]'
-                : 'border border-[#64748b] bg-transparent',
+                ? 'bg-primary'
+                : 'border border-muted-foreground bg-transparent',
               isFirst && 'rounded-l-[4px]',
               isLast && 'rounded-r-[4px]'
             )}
@@ -33,7 +33,7 @@ export function ToggleGroup({ options, selected, onChange }: ToggleGroupProps) {
             <Text
               className={cn(
                 'text-[12px] font-bold uppercase tracking-wide',
-                isActive ? 'text-white' : 'text-[#64748b]'
+                isActive ? 'text-primary-foreground' : 'text-muted-foreground'
               )}
             >
               {option}

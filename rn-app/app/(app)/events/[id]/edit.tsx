@@ -13,6 +13,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation } from 'urql';
 import { Text } from '~/components/ui/text';
+import { useThemeColors } from '~/lib/useThemeColors';
 import { Input } from '~/components/ui/input';
 import { SectionHeader } from '~/components/ui/section-header';
 import { ToggleGroup } from '~/components/ui/toggle-group';
@@ -46,6 +47,7 @@ const toTimeString = (iso?: string) => {
 };
 
 export default function EditEventScreen() {
+    const colors = useThemeColors();
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [initialized, setInitialized] = React.useState(false);
@@ -236,14 +238,14 @@ export default function EditEventScreen() {
 
     if (eventFetching && !initialized) {
         return (
-            <SafeAreaView className='flex-1 bg-[#1a1a2e] items-center justify-center'>
-                <Text className='text-[#64748b]'>Loading...</Text>
+            <SafeAreaView className='flex-1 bg-background items-center justify-center'>
+                <Text className='text-muted-foreground'>Loading...</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className='flex-1 bg-[#1a1a2e]'>
+        <SafeAreaView className='flex-1 bg-background'>
             <KeyboardAvoidingView
                 className='flex-1'
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -256,9 +258,9 @@ export default function EditEventScreen() {
                     {/* Header */}
                     <View className='flex-row items-center px-6 pt-4 pb-6'>
                         <Pressable onPress={() => router.back()} className='mr-4'>
-                            <Text className='text-[24px] text-[#64748b]'>←</Text>
+                            <Text className='text-[24px] text-muted-foreground'>←</Text>
                         </Pressable>
-                        <Text className='flex-1 text-center text-[24px] font-bold uppercase tracking-widest text-white mr-8'>
+                        <Text className='flex-1 text-center text-[24px] font-bold uppercase tracking-widest text-foreground mr-8'>
                             EDIT EVENT
                         </Text>
                     </View>
@@ -270,7 +272,7 @@ export default function EditEventScreen() {
                             placeholder='Event name'
                             value={name}
                             onChangeText={setName}
-                            placeholderTextColor='#64748b'
+                            placeholderTextColor={colors.mutedForeground}
                         />
                         {errors.name ? (
                             <Text className='text-red-400 text-[12px] -mt-1'>{errors.name}</Text>
@@ -282,7 +284,7 @@ export default function EditEventScreen() {
                             multiline
                             numberOfLines={4}
                             textAlignVertical='top'
-                            placeholderTextColor='#64748b'
+                            placeholderTextColor={colors.mutedForeground}
                             style={{ minHeight: 96 }}
                         />
                     </View>
@@ -300,11 +302,11 @@ export default function EditEventScreen() {
                         {locationMode === 'venue' ? (
                             <Pressable
                                 onPress={() => setVenueModalVisible(true)}
-                                className='border border-[#64748b]/40 rounded-[4px] px-4 py-3'
+                                className='border border-muted-foreground/40 rounded-[4px] px-4 py-3'
                             >
                                 <Text
                                     className={
-                                        selectedVenue ? 'text-white' : 'text-[#64748b]'
+                                        selectedVenue ? 'text-foreground' : 'text-muted-foreground'
                                     }
                                 >
                                     {selectedVenue ? selectedVenue.name : 'Tap to select venue'}
@@ -316,7 +318,7 @@ export default function EditEventScreen() {
                                     placeholder='Location name'
                                     value={locationName}
                                     onChangeText={setLocationName}
-                                    placeholderTextColor='#64748b'
+                                    placeholderTextColor={colors.mutedForeground}
                                 />
                                 {errors.locationName ? (
                                     <Text className='text-red-400 text-[12px] -mt-1'>
@@ -327,7 +329,7 @@ export default function EditEventScreen() {
                                     placeholder='Address (optional)'
                                     value={locationAddress}
                                     onChangeText={setLocationAddress}
-                                    placeholderTextColor='#64748b'
+                                    placeholderTextColor={colors.mutedForeground}
                                 />
                             </>
                         )}
@@ -337,7 +339,7 @@ export default function EditEventScreen() {
                     <View className='px-6 mt-6 gap-3'>
                         <SectionHeader title='SCHEDULE' />
                         <View className='gap-2'>
-                            <Text className='text-[11px] uppercase tracking-wide text-[#64748b]'>
+                            <Text className='text-[11px] uppercase tracking-wide text-muted-foreground'>
                                 Start
                             </Text>
                             <View className='flex-row gap-2'>
@@ -346,7 +348,7 @@ export default function EditEventScreen() {
                                         placeholder='YYYY-MM-DD'
                                         value={startDate}
                                         onChangeText={setStartDate}
-                                        placeholderTextColor='#64748b'
+                                        placeholderTextColor={colors.mutedForeground}
                                         keyboardType='numbers-and-punctuation'
                                     />
                                 </View>
@@ -355,7 +357,7 @@ export default function EditEventScreen() {
                                         placeholder='HH:MM'
                                         value={startTime}
                                         onChangeText={setStartTime}
-                                        placeholderTextColor='#64748b'
+                                        placeholderTextColor={colors.mutedForeground}
                                         keyboardType='numbers-and-punctuation'
                                     />
                                 </View>
@@ -367,7 +369,7 @@ export default function EditEventScreen() {
                             ) : null}
                         </View>
                         <View className='gap-2'>
-                            <Text className='text-[11px] uppercase tracking-wide text-[#64748b]'>
+                            <Text className='text-[11px] uppercase tracking-wide text-muted-foreground'>
                                 End (optional)
                             </Text>
                             <View className='flex-row gap-2'>
@@ -376,7 +378,7 @@ export default function EditEventScreen() {
                                         placeholder='YYYY-MM-DD'
                                         value={endDate}
                                         onChangeText={setEndDate}
-                                        placeholderTextColor='#64748b'
+                                        placeholderTextColor={colors.mutedForeground}
                                         keyboardType='numbers-and-punctuation'
                                     />
                                 </View>
@@ -385,7 +387,7 @@ export default function EditEventScreen() {
                                         placeholder='HH:MM'
                                         value={endTime}
                                         onChangeText={setEndTime}
-                                        placeholderTextColor='#64748b'
+                                        placeholderTextColor={colors.mutedForeground}
                                         keyboardType='numbers-and-punctuation'
                                     />
                                 </View>
@@ -397,12 +399,12 @@ export default function EditEventScreen() {
                     <View className='px-6 mt-6 gap-3'>
                         <SectionHeader title='DOOR SALES' />
                         <View className='flex-row items-center justify-between'>
-                            <Text className='text-white text-[14px]'>Enable door sales</Text>
+                            <Text className='text-foreground text-[14px]'>Enable door sales</Text>
                             <Switch
                                 value={doorSalesEnabled}
                                 onValueChange={setDoorSalesEnabled}
-                                trackColor={{ false: 'rgba(100,116,139,0.3)', true: '#00838f' }}
-                                thumbColor='#ffffff'
+                                trackColor={{ false: colors.border, true: colors.primary }}
+                                thumbColor={colors.foreground}
                             />
                         </View>
                         {doorSalesEnabled && (
@@ -419,9 +421,9 @@ export default function EditEventScreen() {
                                 ))}
                                 <Pressable
                                     onPress={addTierRow}
-                                    className='border border-dashed border-[#64748b] rounded-[4px] py-3 items-center mt-1'
+                                    className='border border-dashed border-muted-foreground rounded-[4px] py-3 items-center mt-1'
                                 >
-                                    <Text className='text-[#64748b] text-[12px] uppercase font-bold tracking-wide'>
+                                    <Text className='text-muted-foreground text-[12px] uppercase font-bold tracking-wide'>
                                         + ADD TIER
                                     </Text>
                                 </Pressable>
@@ -434,10 +436,10 @@ export default function EditEventScreen() {
                         <Pressable
                             onPress={handleSubmit}
                             disabled={submitting}
-                            className='h-14 bg-[#00838f] rounded-[4px] items-center justify-center'
+                            className='h-14 bg-primary rounded-[4px] items-center justify-center'
                             style={{ opacity: submitting ? 0.6 : 1 }}
                         >
-                            <Text className='text-white font-bold uppercase tracking-wide text-[14px]'>
+                            <Text className='text-primary-foreground font-bold uppercase tracking-wide text-[14px]'>
                                 {submitting ? 'SAVING...' : 'SAVE CHANGES'}
                             </Text>
                         </Pressable>
@@ -452,13 +454,13 @@ export default function EditEventScreen() {
                 presentationStyle='pageSheet'
                 onRequestClose={() => setVenueModalVisible(false)}
             >
-                <View className='flex-1 bg-[#1a1a2e]'>
+                <View className='flex-1 bg-background'>
                     <View className='flex-row items-center justify-between px-6 pt-6 pb-4'>
-                        <Text className='text-[18px] font-bold uppercase tracking-widest text-white'>
+                        <Text className='text-[18px] font-bold uppercase tracking-widest text-foreground'>
                             SELECT VENUE
                         </Text>
                         <Pressable onPress={() => setVenueModalVisible(false)}>
-                            <Text className='text-[#64748b] text-[14px]'>Cancel</Text>
+                            <Text className='text-muted-foreground text-[14px]'>Cancel</Text>
                         </Pressable>
                     </View>
                     <View className='px-6 pb-4'>
@@ -466,7 +468,7 @@ export default function EditEventScreen() {
                             placeholder='Search venues...'
                             value={venueSearch}
                             onChangeText={setVenueSearch}
-                            placeholderTextColor='#64748b'
+                            placeholderTextColor={colors.mutedForeground}
                         />
                     </View>
                     <FlatList
@@ -479,61 +481,61 @@ export default function EditEventScreen() {
                                     setSelectedVenue(item);
                                     setVenueModalVisible(false);
                                 }}
-                                className='border border-[#64748b]/30 rounded-[4px] px-4 py-3'
+                                className='border border-muted-foreground/30 rounded-[4px] px-4 py-3'
                             >
-                                <Text className='text-white font-medium'>{item.name}</Text>
+                                <Text className='text-foreground font-medium'>{item.name}</Text>
                                 {item.address ? (
-                                    <Text className='text-[#64748b] text-[12px] mt-0.5'>
+                                    <Text className='text-muted-foreground text-[12px] mt-0.5'>
                                         {item.address}
                                     </Text>
                                 ) : null}
                             </Pressable>
                         )}
                         ListEmptyComponent={
-                            <Text className='text-[#64748b] text-center py-8'>
+                            <Text className='text-muted-foreground text-center py-8'>
                                 No venues found
                             </Text>
                         }
                         ListFooterComponent={
                             <View className='mt-4'>
                                 {showCreateVenue ? (
-                                    <View className='gap-3 border border-[#00838f]/40 rounded-[4px] p-4'>
-                                        <Text className='text-[11px] uppercase tracking-wide text-[#00838f] font-bold'>
+                                    <View className='gap-3 border border-primary/40 rounded-[4px] p-4'>
+                                        <Text className='text-[11px] uppercase tracking-wide text-primary font-bold'>
                                             NEW VENUE
                                         </Text>
                                         <Input
                                             placeholder='Venue name *'
                                             value={newVenueName}
                                             onChangeText={setNewVenueName}
-                                            placeholderTextColor='#64748b'
+                                            placeholderTextColor={colors.mutedForeground}
                                         />
                                         <Input
                                             placeholder='Address (optional)'
                                             value={newVenueAddress}
                                             onChangeText={setNewVenueAddress}
-                                            placeholderTextColor='#64748b'
+                                            placeholderTextColor={colors.mutedForeground}
                                         />
                                         <Input
                                             placeholder='Capacity (optional)'
                                             value={newVenueCapacity}
                                             onChangeText={setNewVenueCapacity}
                                             keyboardType='numeric'
-                                            placeholderTextColor='#64748b'
+                                            placeholderTextColor={colors.mutedForeground}
                                         />
                                         <View className='flex-row gap-2'>
                                             <Pressable
                                                 onPress={() => setShowCreateVenue(false)}
-                                                className='flex-1 border border-[#64748b] rounded-[4px] py-3 items-center'
+                                                className='flex-1 border border-muted-foreground rounded-[4px] py-3 items-center'
                                             >
-                                                <Text className='text-[#64748b] text-[12px] uppercase font-bold'>
+                                                <Text className='text-muted-foreground text-[12px] uppercase font-bold'>
                                                     CANCEL
                                                 </Text>
                                             </Pressable>
                                             <Pressable
                                                 onPress={handleCreateVenue}
-                                                className='flex-1 bg-[#00838f] rounded-[4px] py-3 items-center'
+                                                className='flex-1 bg-primary rounded-[4px] py-3 items-center'
                                             >
-                                                <Text className='text-white text-[12px] uppercase font-bold'>
+                                                <Text className='text-primary-foreground text-[12px] uppercase font-bold'>
                                                     CREATE
                                                 </Text>
                                             </Pressable>
@@ -542,9 +544,9 @@ export default function EditEventScreen() {
                                 ) : (
                                     <Pressable
                                         onPress={() => setShowCreateVenue(true)}
-                                        className='border border-dashed border-[#64748b] rounded-[4px] py-3 items-center'
+                                        className='border border-dashed border-muted-foreground rounded-[4px] py-3 items-center'
                                     >
-                                        <Text className='text-[#64748b] text-[12px] uppercase font-bold tracking-wide'>
+                                        <Text className='text-muted-foreground text-[12px] uppercase font-bold tracking-wide'>
                                             + CREATE NEW VENUE
                                         </Text>
                                     </Pressable>

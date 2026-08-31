@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useQuery } from 'urql';
 import { Text } from '~/components/ui/text';
+import { useThemeColors } from '~/lib/useThemeColors';
 import { EmptyState } from '~/components/ui/empty-state';
 import { FloatingActionButton } from '~/components/ui/floating-action-button';
 import { EventCard } from '~/components/ui/event-card';
@@ -20,6 +21,7 @@ const STATUS_FILTERS = ['ALL', 'DRAFT', 'ACTIVE', 'FINISHED', 'CANCELLED'] as co
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 export default function MyEventsScreen() {
+    const colors = useThemeColors();
     const router = useRouter();
     const { clearAuth } = useAuthStore();
     const [selectedStatus, setSelectedStatus] = React.useState<StatusFilter>('ALL');
@@ -49,19 +51,19 @@ export default function MyEventsScreen() {
     }, [reExecute]);
 
     return (
-        <SafeAreaView className='flex-1 bg-[#1a1a2e]'>
+        <SafeAreaView className='flex-1 bg-background'>
             {/* Header */}
             <View className='flex-row items-start justify-between px-6 pt-4 pb-2'>
                 <View className='flex-1'>
-                    <Text className='text-[32px] font-bold uppercase tracking-widest text-white leading-tight'>
+                    <Text className='text-[32px] font-bold uppercase tracking-widest text-foreground leading-tight'>
                         MY EVENTS
                     </Text>
-                    <Text className='text-[12px] uppercase tracking-wide text-[#64748b] mt-1'>
+                    <Text className='text-[12px] uppercase tracking-wide text-muted-foreground mt-1'>
                         {allEvents.length} EVENT{allEvents.length !== 1 ? 'S' : ''}
                     </Text>
                 </View>
                 <Pressable onPress={clearAuth} className='pt-2'>
-                    <Text className='text-[12px] uppercase tracking-wide text-[#64748b]'>
+                    <Text className='text-[12px] uppercase tracking-wide text-muted-foreground'>
                         Sign Out
                     </Text>
                 </Pressable>
@@ -71,7 +73,16 @@ export default function MyEventsScreen() {
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 24, gap: 8, paddingVertical: 8 }}
+                // flexGrow:0 stops the horizontal ScrollView claiming vertical space in
+                // the column layout; alignItems keeps the chips sized to their content
+                // rather than stretching to the cross axis.
+                style={{ flexGrow: 0, flexShrink: 0 }}
+                contentContainerStyle={{
+                    paddingHorizontal: 24,
+                    gap: 8,
+                    paddingVertical: 8,
+                    alignItems: 'center',
+                }}
             >
                 {STATUS_FILTERS.map((status) => {
                     const isActive = selectedStatus === status;
@@ -79,10 +90,10 @@ export default function MyEventsScreen() {
                         <Pressable
                             key={status}
                             onPress={() => setSelectedStatus(status)}
-                            className={`rounded-sm px-3 py-1.5 ${isActive ? 'bg-[#00838f]' : 'border border-[#64748b]'}`}
+                            className={`rounded-sm px-3 py-1.5 ${isActive ? 'bg-primary' : 'border border-muted-foreground'}`}
                         >
                             <Text
-                                className={`text-[11px] uppercase font-bold tracking-wide ${isActive ? 'text-white' : 'text-[#64748b]'}`}
+                                className={`text-[11px] uppercase font-bold tracking-wide ${isActive ? 'text-primary-foreground' : 'text-muted-foreground'}`}
                             >
                                 {status}
                             </Text>
@@ -104,7 +115,7 @@ export default function MyEventsScreen() {
                     <RefreshControl
                         refreshing={refreshing || fetching}
                         onRefresh={handleRefresh}
-                        tintColor='#00838f'
+                        tintColor={colors.primary}
                     />
                 }
             >

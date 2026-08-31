@@ -9,22 +9,28 @@ interface StatusBadgeProps {
   status: EventStatus;
 }
 
+/**
+ * Status is expressed as much by *treatment* as by hue, per docs/design-system.md:
+ * ACTIVE feels alive (solid fill), everything else is restrained (outline).
+ * On the solid fill the label uses `primary-foreground` — white on the bright teal
+ * measures 2.27:1 and is unreadable.
+ */
 const statusConfig: Record<EventStatus, { containerClass: string; textClass: string }> = {
   DRAFT: {
-    containerClass: 'border border-gray-500',
-    textClass: 'text-gray-500',
+    containerClass: 'border border-status-draft',
+    textClass: 'text-status-draft',
   },
   ACTIVE: {
-    containerClass: 'bg-[#00838f]',
-    textClass: 'text-white',
+    containerClass: 'bg-status-active',
+    textClass: 'text-primary-foreground',
   },
   FINISHED: {
-    containerClass: 'bg-[#1a237e]/60',
-    textClass: 'text-white',
+    containerClass: 'border border-status-finished',
+    textClass: 'text-status-finished',
   },
   CANCELLED: {
-    containerClass: 'bg-[#dc2626]/60',
-    textClass: 'text-white',
+    containerClass: 'border border-status-cancelled',
+    textClass: 'text-status-cancelled',
   },
 };
 

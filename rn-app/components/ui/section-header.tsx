@@ -7,7 +7,7 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ title }: SectionHeaderProps) {
   return (
-    <Text className="text-[11px] font-bold uppercase tracking-widest text-[#00838f]">
+    <Text className="text-[11px] font-bold uppercase tracking-widest text-primary">
       {title}
     </Text>
   );

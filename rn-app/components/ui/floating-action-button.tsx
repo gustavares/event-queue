@@ -1,17 +1,20 @@
 import * as React from 'react';
 import { Pressable, Text } from 'react-native';
+import { useThemeColors } from '~/lib/useThemeColors';
 
 interface FloatingActionButtonProps {
   onPress: () => void;
 }
 
 export function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
+  const colors = useThemeColors();
+
   return (
     <Pressable
       onPress={onPress}
-      className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-[4px] bg-[#00838f] shadow-lg"
+      className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-[4px] bg-primary shadow-lg"
       style={{
-        shadowColor: '#00838f',
+        shadowColor: colors.primary,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,
@@ -21,7 +24,7 @@ export function FloatingActionButton({ onPress }: FloatingActionButtonProps) {
       <Text
         style={{
           fontSize: 28,
-          color: '#ffffff',
+          color: colors.primaryForeground,
           fontWeight: 'bold',
           lineHeight: 32,
           includeFontPadding: false,

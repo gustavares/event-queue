@@ -12,11 +12,11 @@ export function EmptyState({ icon, title, subtitle }: EmptyStateProps) {
   return (
     <View className="flex-1 items-center justify-center gap-6">
       <View className="items-center">{icon}</View>
-      <Text className="text-[20px] font-bold uppercase tracking-widest text-white">
+      <Text className="text-[20px] font-bold uppercase tracking-widest text-foreground">
         {title}
       </Text>
       {subtitle ? (
-        <Text className="text-[14px] text-[#64748b]">{subtitle}</Text>
+        <Text className="text-[14px] text-muted-foreground">{subtitle}</Text>
       ) : null}
     </View>
   );

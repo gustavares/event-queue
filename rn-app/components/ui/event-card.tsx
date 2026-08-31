@@ -3,6 +3,8 @@ import { Pressable, View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { cn } from '~/lib/utils';
+import { useThemeColors } from '~/lib/useThemeColors';
+import type { ThemeColors } from '~/lib/theme';
 
 type EventStatus = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
 
@@ -21,12 +23,15 @@ interface EventCardProps {
   onPress: () => void;
 }
 
-const statusAccentColor: Record<EventStatus, string> = {
-  DRAFT: '#64748b',
-  ACTIVE: '#00838f',
-  FINISHED: '#1a237e',
-  CANCELLED: '#dc2626',
-};
+function statusAccent(status: EventStatus, colors: ThemeColors): string {
+  const map: Record<EventStatus, string> = {
+    DRAFT: colors.statusDraft,
+    ACTIVE: colors.statusActive,
+    FINISHED: colors.statusFinished,
+    CANCELLED: colors.statusCancelled,
+  };
+  return map[status];
+}
 
 function formatEventDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
@@ -38,7 +43,8 @@ function formatEventDate(date: string | Date): string {
 }
 
 export function EventCard({ event, onPress }: EventCardProps) {
-  const accentColor = statusAccentColor[event.status];
+  const colors = useThemeColors();
+  const accentColor = statusAccent(event.status, colors);
   const locationLabel = event.venue ?? event.locationName;
 
   return (
@@ -56,7 +62,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
         {/* Top row */}
         <View className="flex-row items-center justify-between">
           <Text
-            className="flex-1 pr-3 text-[16px] font-bold text-white"
+            className="flex-1 pr-3 text-[16px] font-bold text-foreground"
             numberOfLines={1}
           >
             {event.name}
@@ -66,12 +72,12 @@ export function EventCard({ event, onPress }: EventCardProps) {
 
         {/* Bottom row */}
         <View className="mt-2 flex-row items-center gap-3">
-          <Text className="text-[13px] text-[#64748b]">
+          <Text className="text-[13px] text-muted-foreground">
             {formatEventDate(event.startDate)}
           </Text>
           {locationLabel ? (
             <Text
-              className="flex-1 text-[13px] text-[#64748b]"
+              className="flex-1 text-[13px] text-muted-foreground"
               numberOfLines={1}
             >
               {locationLabel}

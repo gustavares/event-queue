@@ -83,7 +83,8 @@
     --status-draft: 240 18% 69%;
     --status-active: 187 81% 45.5%;
     --status-finished: 240 22% 59%;
-    --status-cancelled: 0 38% 50%;
+    /* 61% not 50%: badge text is 11px, which needs 4.5:1 — the darker red measured 3.31:1 */
+    --status-cancelled: 0 45% 61%;
 
     --atmosphere-indigo: 235 66% 30%;
   }
