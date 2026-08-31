@@ -2,48 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Event Queue design tokens — see docs/design-system.md (authoritative).
+   Structure is shadcn's (HSL triplets consumed as hsl(var(--x))); values are ours.
+   :root is the LIGHT theme (desktop manager). .dark:root is the DARK theme, which is
+   the app default — lib/useColorScheme.tsx falls back to 'dark'.
+   lib/constants.ts NAV_THEME mirrors these values for React Navigation; keep in sync. */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* --- light: desktop manager surfaces --- */
+    --background: 240 20% 96.5%;
+    --foreground: 240 33% 12.5%;
+
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 33% 12.5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --popover-foreground: 240 33% 12.5%;
+
+    /* primary flips: the bright on-dark cyan scores 2.07:1 on light and is unusable */
+    --primary: 185 100% 28%;
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 185 100% 22%;
+
+    --secondary: 240 20% 91%;
+    --secondary-foreground: 240 33% 12.5%;
+    --muted: 240 20% 91%;
+    --muted-foreground: 240 16% 34%;
+    --accent: 185 100% 28%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 64% 47%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 72% 29%;
+    --warning: 32 90% 38%;
+    --ink-subtle: 240 12% 55%;
+
+    --border: 240 16% 84%;
+    --input: 240 16% 84%;
+    --ring: 185 100% 28%;
+
+    --status-draft: 240 16% 34%;
+    --status-active: 185 100% 28%;
+    --status-finished: 240 22% 45%;
+    --status-cancelled: 0 45% 42%;
+
+    --atmosphere-indigo: 235 66% 30%;
   }
 
   .dark:root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    /* --- dark: the app default --- */
+    --background: 240 28% 14%;
+    --foreground: 240 24% 96%;
+
+    --card: 240 26% 17.5%;
+    --card-foreground: 240 24% 96%;
+    --popover: 240 23% 26%;
+    --popover-foreground: 240 24% 96%;
+
+    --primary: 187 81% 45.5%;
+    --primary-foreground: 240 28% 14%;
+    --primary-deep: 185 100% 28%;
+
+    --secondary: 240 24% 22%;
+    --secondary-foreground: 240 24% 96%;
+    --muted: 240 24% 22%;
+    --muted-foreground: 240 18% 69%;
+    --accent: 187 81% 45.5%;
+    --accent-foreground: 240 28% 14%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 240 28% 14%;
+    --success: 151 60% 48%;
+    --warning: 37 91% 55%;
+    --ink-subtle: 240 11% 48.5%;
+
+    --border: 240 19% 30%;
+    --input: 240 19% 30%;
+    --ring: 187 81% 45.5%;
+
+    --status-draft: 240 18% 69%;
+    --status-active: 187 81% 45.5%;
+    --status-finished: 240 22% 59%;
+    --status-cancelled: 0 38% 50%;
+
+    --atmosphere-indigo: 235 66% 30%;
+  }
+
+  /* Door check-in and guest ticket are deliberately OUTSIDE the theme blocks.
+     The ticket is captured as an image and shared into WhatsApp — it has no theme
+     and must not inherit the sender's. The door floods must read identically
+     regardless of what the host's phone is set to. */
+  :root {
+    --door-ok: 151 60% 48%;
+    --door-deny: 0 85% 60%;
+    --door-ground: 240 22% 8%;
+
+    --ticket-ground: 240 22% 8%;
+    --ticket-ink: 0 0% 100%;
+    --ticket-accent: 187 81% 45.5%;
   }
 }

@@ -41,6 +41,48 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+
+        // --- Event Queue tokens (see docs/design-system.md) ---
+        'primary-deep': 'hsl(var(--primary-deep))',
+        'ink-subtle': 'hsl(var(--ink-subtle))',
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        'atmosphere-indigo': 'hsl(var(--atmosphere-indigo))',
+
+        status: {
+          draft: 'hsl(var(--status-draft))',
+          active: 'hsl(var(--status-active))',
+          finished: 'hsl(var(--status-finished))',
+          cancelled: 'hsl(var(--status-cancelled))',
+        },
+
+        // Theme-independent by design — the ticket is shared as an image and the
+        // door floods must not depend on the host's colour scheme.
+        door: {
+          ok: 'hsl(var(--door-ok))',
+          deny: 'hsl(var(--door-deny))',
+          ground: 'hsl(var(--door-ground))',
+        },
+        ticket: {
+          ground: 'hsl(var(--ticket-ground))',
+          ink: 'hsl(var(--ticket-ink))',
+          accent: 'hsl(var(--ticket-accent))',
+        },
+      },
+      fontFamily: {
+        display: ['Unbounded_700Bold', 'sans-serif'],
+        sans: ['Archivo_400Regular', 'sans-serif'],
+        medium: ['Archivo_500Medium', 'sans-serif'],
+        bold: ['Archivo_700Bold', 'sans-serif'],
+        mono: ['JetBrainsMono_400Regular', 'monospace'],
+      },
+      borderRadius: {
+        // Sharp geometry — 4px is the maximum. See design-system.md § Corners.
+        none: '0px',
+        sm: '2px',
+        DEFAULT: '4px',
+        md: '4px',
+        lg: '4px',
       },
       borderWidth: {
         hairline: hairlineWidth(),
