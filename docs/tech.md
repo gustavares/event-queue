@@ -6,11 +6,11 @@
 
 | Layer | Technology | Version | Purpose |
 |-------|-----------|---------|---------|
-| Runtime | Node.js | 22 | Backend runtime |
+| Runtime | Node.js | 22 | Backend runtime — pinned in `.nvmrc`, enforced by `engines` in `backend/package.json` |
 | Language | TypeScript | 5.x | Type safety across backend and frontend |
 | Package Manager | pnpm | 10.8.0 | Monorepo dependency management |
 | API | GraphQL Yoga | — | GraphQL server |
-| ORM | Drizzle ORM | 0.42.0 | Type-safe SQL, schema-as-code |
+| ORM | Drizzle ORM | 0.45.2 | Type-safe SQL, schema-as-code |
 | Database | PostgreSQL | 16 | Primary data store |
 | Auth | JOSE + Argon2 | — | JWT signing/verification + password hashing |
 | Validation | Zod | 3.24.4 | Input validation in services |
@@ -40,6 +40,9 @@ Frontend       → Expo dev server (port 8081)
 
 | Command | Action |
 |---------|--------|
+| `make build` | Build the Docker images for backend services |
+| `make up` | Start Docker services (foreground) |
+| `make up-w` | Start Docker services in watch mode |
 | `make up-d` | Start Docker services (detached) |
 | `make down` | Stop Docker services |
 | `make logs` | Tail Docker logs |
@@ -50,15 +53,29 @@ Frontend       → Expo dev server (port 8081)
 ### Database Management
 
 - Schema defined in `backend/src/db/schema.ts` (Drizzle)
-- Push schema changes: `npx drizzle-kit push`
 - Config: `backend/drizzle.config.ts` — reads `DATABASE_URL` from env, defaults to `postgres://postgres:postgres@localhost:5432/event_queue`
+- Migrations are **generated then applied** — this project does not use `drizzle-kit push`:
+
+| Command | Action |
+|---------|--------|
+| `pnpm db:generate` | Diff `schema.ts` against the migration history, emit SQL into `backend/drizzle/` |
+| `pnpm db:migrate` | Apply pending migrations (runs `src/db/migrate.ts`) |
+| `pnpm db:studio` | Open Drizzle Studio against the configured database |
+
+Run both from `backend/`. Generated SQL is committed — review it before applying.
 
 ## Environment Variables
 
-| Variable | Location | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | `backend/.env` | PostgreSQL connection string |
-| `JWT_SECRET` | `backend/.env` | JOSE JWT signing secret (if used; currently derives from env) |
+All backend variables live in `backend/.env` (gitignored; copy `backend/.env.example` to start).
+
+| Variable | Location | Required | Default | Purpose |
+|----------|----------|----------|---------|---------|
+| `DATABASE_URL` | `backend/.env` | yes | — | PostgreSQL connection string |
+| `JWT_SECRET` | `backend/.env` | **yes** | — | JOSE JWT signing secret. The process calls `process.exit(1)` at startup if unset |
+| `JWT_ISSUER` | `backend/.env` | no | `event-queue-app` | `iss` claim on issued tokens |
+| `JWT_AUDIENCE` | `backend/.env` | no | `event-queue-users` | `aud` claim on issued tokens |
+| `PORT` | `backend/.env` | no | `4000` | Backend HTTP port |
+| `EXPO_PUBLIC_GRAPHQL_URL` | `rn-app/.env` | no | `http://localhost:4000/graphql` | API endpoint the client calls. **Must be set to the host machine's LAN IP** when running on a physical device or emulator — `localhost` resolves to the device itself |
 
 ## API Architecture
 
@@ -109,7 +126,7 @@ Services are instantiated once at server start and injected via context. Reposit
 | Drizzle over Prisma | Type-safe SQL without heavy codegen, schema-as-code, faster runtime |
 | Zustand over Redux | Minimal boilerplate, works well with React Native, easy SecureStore integration |
 | NativeWind over StyleSheet | Tailwind utility classes, consistent with web patterns, rapid iteration |
-| JOSE over jsonwebtoken | Edge-compatible, modern, smaller. jsonwebtoken is also installed but JOSE is primary for JWT |
+| JOSE over jsonwebtoken | Edge-compatible, modern, smaller. `jsonwebtoken` was removed from dependencies on 2026-08-31 — it was never imported and carried a `jws` advisory |
 | CUID2 for IDs | Collision-resistant, URL-safe, sortable, no sequential guessing |
 | Soft delete | Events are never hard-deleted; preserves data for analytics and audit |
 | Lazy auto-close | Events transition to FINISHED on read when past endDate, no background job needed for MVP |

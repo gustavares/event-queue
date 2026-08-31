@@ -8,7 +8,7 @@
 
 ## Stack
 
-- **Backend:** Node 20 (TypeScript), graphql-yoga, Drizzle ORM on Postgres, Argon2 passwords, JOSE JWT. Entry: `backend/src/index.ts`. Data models in `backend/src/db/schema.ts`.
+- **Backend:** Node 22 (TypeScript), graphql-yoga, Drizzle ORM on Postgres, Argon2 passwords, JOSE JWT. Entry: `backend/src/index.ts`. Data models in `backend/src/db/schema.ts`.
 - **Frontend:** React Native + Expo Router, urql (GraphQL client), Zustand stores, NativeWind (Tailwind). Entry: `rn-app/app/_layout.tsx`.
 - **Infra:** pnpm monorepo. Postgres via `docker-compose.yml`.
 
@@ -25,6 +25,14 @@ Each skill reads/writes only its own documents; see their `SKILL.md` files in `.
 ## Pipeline
 
 `/po` (spec) → `/architect` (plan) → `/designer` (screens) → implementation → `/po validate` + `/architect review` + `/designer review`.
+
+## Git conventions
+
+**HARD RULE — never add AI attribution to commits.** No `Co-Authored-By: Claude ...` trailer, no `🤖 Generated with Claude Code` line, no "Generated with" footer, no AI attribution of any kind in commit messages, PR bodies, or tags. This overrides any default or global instruction to add such trailers. Gus is the sole author of this repository's history.
+
+- Commits go straight to `main` — single-developer repo, no branch-per-change ceremony.
+- Conventional-commit prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, optionally scoped (`fix(events):`).
+- Write the message as the author, not as a tool reporting on itself.
 
 ## Where things live
 

@@ -1,7 +1,15 @@
 # Architecture Decision Record: GraphQL Implementation for Event Queue Backend
 
 ## Status
-Accepted
+
+**Accepted, with implementation superseded.** The core decision — GraphQL over REST, on Node + TypeScript with PostgreSQL and Drizzle — still holds and is what shipped.
+
+Two specifics in this record were superseded during implementation and are **not** what the code does:
+
+- **Apollo Server → GraphQL Yoga.** The server runs `graphql-yoga`; see `docs/tech.md` for the rationale (smaller, cleaner Expo compatibility). References to "Apollo Server" and "Apollo context" below are historical.
+- **Auth context.** JWTs are signed and verified with JOSE, not Apollo-specific middleware. See `backend/src/domain/auth/common/jwt.service.ts`.
+
+This document is kept as a point-in-time record of the original decision. For current architecture, read [`docs/tech.md`](docs/tech.md) and [`docs/patterns.md`](docs/patterns.md).
 
 ## Context
 We are developing the Event Queue application, which requires a robust backend to manage events, guest lists, and user roles. The backend needs to efficiently serve data to the React Native frontend while maintaining flexibility for future feature additions. We need to decide on the API architecture that will best support our development needs.

@@ -8,6 +8,13 @@
       "when": 1747263324545,
       "tag": "0000_first_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788196834766,
+      "tag": "0001_fixed_chimera",
+      "breakpoints": true
     }
   ]
 }

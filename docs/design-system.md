@@ -83,21 +83,25 @@ Base unit: 4px. Scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64.
 | Avatar | `rn-app/components/ui/avatar.tsx` | ✅ Built |
 | Progress | `rn-app/components/ui/progress.tsx` | ✅ Built |
 | Tooltip | `rn-app/components/ui/tooltip.tsx` | ✅ Built |
-| EventCard | — | ⬚ Planned |
-| StatusBadge | — | ⬚ Planned |
-| SectionHeader | — | ⬚ Planned |
+| Input | `rn-app/components/ui/input.tsx` | ✅ Built |
+| EventCard | `rn-app/components/ui/event-card.tsx` | ✅ Built |
+| StatusBadge | `rn-app/components/ui/status-badge.tsx` | ✅ Built |
+| SectionHeader | `rn-app/components/ui/section-header.tsx` | ✅ Built |
+| ToggleGroup | `rn-app/components/ui/toggle-group.tsx` | ✅ Built |
+| TierRow | `rn-app/components/ui/tier-row.tsx` | ✅ Built |
+| ConfirmDialog | `rn-app/components/ui/confirm-dialog.tsx` | ✅ Built |
+| SkeletonLoader | `rn-app/components/ui/skeleton-loader.tsx` | ✅ Built |
+| EmptyState | `rn-app/components/ui/empty-state.tsx` | ✅ Built |
+| FloatingActionButton | `rn-app/components/ui/floating-action-button.tsx` | ✅ Built |
+| ThemeToggle | `rn-app/components/ThemeToggle.tsx` | ✅ Built |
 | DateTimePicker | — | ⬚ Planned |
 | BottomSheet | — | ⬚ Planned |
-| VenuePickerSheet | — | ⬚ Planned |
+| VenuePickerSheet | — | ⬚ Planned (venue picker is currently duplicated inline in `create.tsx` and `edit.tsx`) |
 | CreateVenueSheet | — | ⬚ Planned |
-| ToggleGroup | — | ⬚ Planned |
-| TierRow | — | ⬚ Planned |
-| ConfirmDialog | — | ⬚ Planned |
-| SkeletonLoader | — | ⬚ Planned |
-| EmptyState | — | ⬚ Planned |
-| FloatingActionButton | — | ⬚ Planned |
 
 *Components added here as they are built.*
+
+> ⚠️ **Tokens in this document do not exist in code yet.** The palette and typography sections above describe the intended system; `rn-app/tailwind.config.js` still ships the stock shadcn token set and components hardcode hex values. Reconciling the two (either generating these tokens into the Tailwind theme, or rewriting this doc to match shadcn) is open work — see the 🔴 rows in `docs/audits/2026-04-16-full-audit.md`. Do not treat the color names below as usable class names until that lands.
 
 ## Layout Principles
 

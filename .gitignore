@@ -17,3 +17,6 @@ node_modules
 
 # Claude Code — per-user transient state that shouldn't be shared
 .claude/plans/
+
+# Build output
+backend/dist/

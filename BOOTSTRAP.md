@@ -9,8 +9,8 @@
 Run these checks and report what's missing:
 
 1. **Git ≥ 2.40** — `git --version`
-2. **Node 20.x** — `node --version`
-3. **pnpm 9+** — `pnpm --version`
+2. **Node 22.x** — `node --version` (pinned in `.nvmrc`; Node 24 also works, Node 20 is below the `engines` floor)
+3. **pnpm 10+** — `pnpm --version` (the repo pins `pnpm@10.8.0` via `packageManager`)
 4. **Docker Desktop running** — `docker info` (exit 0)
 5. **Postgres client (optional)** — `psql --version` (for manual DB inspection)
 
@@ -130,10 +130,21 @@ Expected logs:
 Open a second terminal:
 
 ```bash
-cd rn-app && pnpm start
+cd rn-app && pnpm dev
 ```
 
-Expected: Expo dev server starts, prints QR / URL. Open web (`w` key) or a simulator.
+(There is no `start` script. The available ones are `dev`, `dev:web`, and `dev:android`. Use `pnpm dev:web` to go straight to the browser target.)
+
+Expected: Expo dev server starts on port 8081, prints QR / URL, and logs `Web Bundled ... index.js (N modules)`. Open web (`w` key) or a simulator.
+
+**If you are running on a physical device or an emulator**, set the API address first — the client defaults to `http://localhost:4000/graphql`, and on a device `localhost` is the device itself, not your machine:
+
+```bash
+# rn-app/.env
+EXPO_PUBLIC_GRAPHQL_URL=http://<your-machine-LAN-IP>:4000/graphql
+```
+
+Web on the same machine needs no change.
 
 ## Step 9 — Smoke test (optional but recommended)
 
