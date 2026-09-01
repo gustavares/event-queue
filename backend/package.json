@@ -13,7 +13,8 @@
     "test-db": "ts-node -e \"import { testConnection } from './src/db'; testConnection().then(process.exit);\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:db:migrate": "ts-node src/test/migrate-test-db.ts"
+    "test:db:migrate": "ts-node src/test/migrate-test-db.ts",
+    "db:seed": "ts-node src/db/seed-discovery.ts"
   },
   "keywords": [],
   "author": "",

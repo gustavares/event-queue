@@ -15,6 +15,13 @@
       "when": 1788196834766,
       "tag": "0001_fixed_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788226014617,
+      "tag": "0002_broken_victor_mancha",
+      "breakpoints": true
     }
   ]
 }
