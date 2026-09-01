@@ -14,7 +14,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:db:migrate": "ts-node src/test/migrate-test-db.ts",
-    "db:seed": "ts-node src/db/seed-discovery.ts"
+    "db:seed": "ts-node src/db/seed-discovery.ts",
+    "db:seed:demo": "ts-node src/db/seed-demo.ts"
   },
   "keywords": [],
   "author": "",
