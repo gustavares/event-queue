@@ -183,3 +183,57 @@
 | BR-ANL-008 | When door sales are not enabled for the event, the door-sales-by-tier section is hidden (or rendered as an explicit empty state) and does not raise an error |
 | BR-ANL-009 | Door-sale revenue per tier is the sum of `tier.price` across all `DoorSaleEntry` rows for that tier |
 | BR-ANL-010 | Analytics are readable for events in any status (DRAFT, ACTIVE, FINISHED, CANCELLED); the view does not gate on status |
+
+## Public Discovery — Visibility
+
+| ID | Rule |
+|----|------|
+| BR-DISC-001 | Every event has a visibility of PUBLIC or UNLISTED; the default is UNLISTED |
+| BR-DISC-002 | Events that exist when public discovery ships are UNLISTED; nothing is published retroactively |
+| BR-DISC-003 | Only PUBLIC events appear in public listings |
+| BR-DISC-004 | The public listing surface requires no authentication, and is the only unauthenticated surface in the API |
+| BR-DISC-005 | The public representation of an event exposes only: name, description, curator note, start and end time, venue name, address, city, genres, lineup, ticket destination, and price range. It never exposes team members, lists, guests, check-ins, door sale records, promoter attribution, or the creating user |
+| BR-DISC-006 | An event has a source of FIRST_PARTY (sold through Event Queue) or CURATED (listed only) |
+| BR-DISC-007 | A CURATED event must carry an external ticket URL; a FIRST_PARTY event must not |
+| BR-DISC-008 | Every public event has a unique, stable, URL-safe slug; a slug stays reserved after unpublishing so old links never resolve to a different event |
+| BR-DISC-009 | An event is listed under exactly one city, taken from its venue; an event with an inline location must have a city assigned explicitly, and one with no city is listed nowhere |
+| BR-DISC-010 | Public listings show upcoming events only; an event whose start time has passed is no longer upcoming |
+| BR-DISC-011 | Public listings are ordered by start time ascending and grouped by start date — an event crossing midnight belongs to its start date |
+| BR-DISC-012 | A CANCELLED event stays visible with a cancelled marker until its start time passes |
+| BR-DISC-013 | A DRAFT event can never be PUBLIC |
+| BR-DISC-014 | A city has a name, a state (UF), and a unique slug |
+| BR-DISC-015 | A venue belongs to exactly one city |
+
+## Public Discovery — Artists & Lineup
+
+| ID | Rule |
+|----|------|
+| BR-ART-001 | An artist has a name and an optional external link; artists are global, not per-event |
+| BR-ART-002 | Artist names are unique case-insensitively; adding an existing name reuses the record rather than creating a duplicate |
+| BR-ART-003 | An event's lineup is an ordered list of artists, in the order the curator sets |
+| BR-ART-004 | A lineup entry may be marked as headliner |
+| BR-ART-005 | Lineup is optional; an event with no lineup is valid and renders without a lineup section |
+
+## Public Discovery — Curation
+
+| ID | Rule |
+|----|------|
+| BR-CUR-001 | Only an operator with the curator capability can create or edit CURATED events |
+| BR-CUR-002 | Curated ingestion takes a source URL, extracts structured facts, and presents them for human confirmation before saving |
+| BR-CUR-003 | Nothing is saved or published from extraction without explicit human confirmation |
+| BR-CUR-004 | Only factual fields are taken from a source: name, date and time, venue, address, lineup, price, ticket URL. Description prose and images are never copied — the description is written by Event Queue |
+| BR-CUR-005 | Every curated event records the source URL it was derived from |
+| BR-CUR-006 | The curator note is original editorial copy written by Event Queue |
+| BR-CUR-007 | An event may be featured for a date window; featured events surface above the listing for their city, and a window that has passed has no effect |
+| BR-CUR-008 | If extraction cannot determine a required field, the event is saved as a draft for manual completion, never published with a guessed value. A start date read as being in the past counts as missing |
+| BR-CUR-009 | A source URL that has already been ingested is reported as a duplicate instead of creating a second listing |
+
+## Public Discovery — Newsletter Capture
+
+| ID | Rule |
+|----|------|
+| BR-SUB-001 | Anyone can subscribe to a city's list with an email address, without an account |
+| BR-SUB-002 | Email is unique per city; re-subscribing is idempotent and does not create a duplicate |
+| BR-SUB-003 | A subscriber record stores email, city, consent timestamp, and an unsubscribe token |
+| BR-SUB-004 | No email is sent by this feature; capture only |
+| BR-SUB-005 | Subscription requires explicit opt-in and records when consent was given (LGPD) |
