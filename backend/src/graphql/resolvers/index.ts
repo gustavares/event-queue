@@ -14,7 +14,25 @@ import { addDoorSaleTier } from '../handlers/events/add-tier.handler';
 import { updateDoorSaleTier } from '../handlers/events/update-tier.handler';
 import { removeDoorSaleTier } from '../handlers/events/remove-tier.handler';
 import { dateTimeScalar } from '../schema/scalars';
-import { Event } from './event.resolver';
+import { Event, Venue } from './event.resolver';
+import { PublicEvent } from './public-event.resolver';
+import {
+    cities,
+    genres,
+    publicEvents,
+    featuredEvents,
+    publicEvent,
+    artist,
+    subscribeToCity,
+} from '../handlers/public/discovery.handler';
+import {
+    publishEvent,
+    unpublishEvent,
+    extractEventFromUrl,
+    confirmCuratedEvent,
+    setCuratorNote,
+    setFeatured,
+} from '../handlers/discovery/discovery.handler';
 
 export const resolvers = {
     DateTime: dateTimeScalar,
@@ -25,6 +43,14 @@ export const resolvers = {
         myEvents: listEvents,
         venues: listVenues,
         venue: getVenue,
+
+        // Public — no authentication
+        cities,
+        genres,
+        publicEvents,
+        featuredEvents,
+        publicEvent,
+        artist,
     },
 
     Mutation: {
@@ -38,7 +64,20 @@ export const resolvers = {
         addDoorSaleTier,
         updateDoorSaleTier,
         removeDoorSaleTier,
+
+        // Public — no authentication
+        subscribeToCity,
+
+        // Publishing and curation
+        publishEvent,
+        unpublishEvent,
+        extractEventFromUrl,
+        confirmCuratedEvent,
+        setCuratorNote,
+        setFeatured,
     },
 
     Event,
+    Venue,
+    PublicEvent,
 };

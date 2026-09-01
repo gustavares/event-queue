@@ -11,6 +11,10 @@ import GetEventsService from '../domain/events/get-events.service';
 import ManageTiersService from '../domain/events/manage-tiers.service';
 import GetVenuesService from '../domain/venues/get-venues.service';
 import GetEventRelationsService from '../domain/events/get-event-relations.service';
+import GetPublicEventsService from '../domain/discovery/get-public-events.service';
+import SubscribeService from '../domain/discovery/subscribe.service';
+import PublishEventService from '../domain/discovery/publish-event.service';
+import CurateEventService from '../domain/discovery/curate-event.service';
 import { UserEntity } from '../repositories/user.entity';
 
 /**
@@ -37,6 +41,12 @@ export interface AppGraphQLContext extends YogaInitialContext {
         getEventsService: GetEventsService;
         getEventRelationsService: GetEventRelationsService;
         manageTiersService: ManageTiersService;
+
+        // Public discovery
+        getPublicEventsService: GetPublicEventsService;
+        subscribeService: SubscribeService;
+        publishEventService: PublishEventService;
+        curateEventService: CurateEventService;
     };
     user?: UserEntity | null;
 }

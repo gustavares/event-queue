@@ -21,3 +21,15 @@ export const Event = {
         return context.services.getEventRelationsService.creator(parent.createdBy);
     },
 };
+
+/** Venue type resolvers. Venue.city backs BR-DISC-015 in the authenticated UI. */
+export const Venue = {
+    city: async (
+        parent: { cityId: string | null },
+        _args: unknown,
+        context: AppGraphQLContext
+    ) => {
+        if (!parent.cityId) return null;
+        return context.services.getPublicEventsService.cityById(parent.cityId);
+    },
+};

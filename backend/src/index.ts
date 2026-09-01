@@ -22,6 +22,19 @@ import GetEventsService from './domain/events/get-events.service';
 import ManageTiersService from './domain/events/manage-tiers.service';
 import GetVenuesService from './domain/venues/get-venues.service';
 import GetEventRelationsService from './domain/events/get-event-relations.service';
+import GetPublicEventsService from './domain/discovery/get-public-events.service';
+import SubscribeService from './domain/discovery/subscribe.service';
+import PublishEventService from './domain/discovery/publish-event.service';
+import CurateEventService from './domain/discovery/curate-event.service';
+import DrizzlePostgresCityRepository from './repositories/city.repository';
+import DrizzlePostgresArtistRepository from './repositories/artist.repository';
+import DrizzlePostgresGenreRepository from './repositories/genre.repository';
+import DrizzlePostgresSubscriberRepository from './repositories/subscriber.repository';
+import DrizzlePostgresPublicEventRepository from './repositories/public-event.repository';
+import UnavailableExtractor from './domain/discovery/common/unavailable-extractor';
+import AnthropicEventExtractor from './domain/discovery/common/anthropic-extractor';
+import type { EventExtractor } from './domain/discovery/common/event-extractor';
+import Anthropic from '@anthropic-ai/sdk';
 import { verifyToken } from './domain/auth/common/jwt.service';
 
 dotenv.config();
@@ -54,6 +67,47 @@ async function startServer() {
     const getVenuesService = new GetVenuesService(venueRepository);
     const getEventRelationsService = new GetEventRelationsService(userRepository, doorSaleTierRepository);
 
+    // ── Public discovery ──────────────────────────────────────────────
+    const cityRepository = new DrizzlePostgresCityRepository(db);
+    const artistRepository = new DrizzlePostgresArtistRepository(db);
+    const genreRepository = new DrizzlePostgresGenreRepository(db);
+    const subscriberRepository = new DrizzlePostgresSubscriberRepository(db);
+    const publicEventRepository = new DrizzlePostgresPublicEventRepository(db);
+
+    // No API key means curation degrades to manual entry rather than breaking — the
+    // UnavailableExtractor throws the same error the UI already handles for an
+    // unreachable page. See docs/features/public-discovery/plan.md.
+    const extractor: EventExtractor = process.env.ANTHROPIC_API_KEY
+        ? new AnthropicEventExtractor(new Anthropic())
+        : new UnavailableExtractor();
+    if (!process.env.ANTHROPIC_API_KEY) {
+        console.log("ℹ️  ANTHROPIC_API_KEY not set — curator ingestion falls back to manual entry.");
+    }
+
+    const getPublicEventsService = new GetPublicEventsService(
+        publicEventRepository,
+        cityRepository,
+        genreRepository,
+        artistRepository
+    );
+    const subscribeService = new SubscribeService(subscriberRepository, cityRepository);
+    const publishEventService = new PublishEventService(
+        eventRepository,
+        eventTeamMemberRepository,
+        venueRepository,
+        publicEventRepository,
+        (slug) => eventRepository.slugExists(slug)
+    );
+    const curateEventService = new CurateEventService(
+        db,
+        eventRepository,
+        publicEventRepository,
+        artistRepository,
+        genreRepository,
+        cityRepository,
+        extractor
+    );
+
     const services = {
         signUpService,
         signInService,
@@ -66,6 +120,10 @@ async function startServer() {
         getEventsService,
         manageTiersService,
         getEventRelationsService,
+        getPublicEventsService,
+        subscribeService,
+        publishEventService,
+        curateEventService,
     };
 
     const yoga = createYoga<object, AppGraphQLContext>({

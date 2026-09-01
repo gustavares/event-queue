@@ -11,6 +11,8 @@ export interface UserEntity {
     id: string;
     email: string;
     name: string;
+    /** BR-CUR-001 — a capability flag, not an event role. */
+    isCurator: boolean;
     deleted: boolean;
     createdAt: Date;
     updatedAt: Date;

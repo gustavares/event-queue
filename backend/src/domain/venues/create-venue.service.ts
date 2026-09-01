@@ -7,6 +7,7 @@ export type CreateVenueData = {
     name: string;
     address: string;
     capacity?: number;
+    cityId?: string;
     userId: string;
 };
 
@@ -14,6 +15,7 @@ const CreateVenueSchema = z.object({
     name: z.string().min(1, "Name is required"),
     address: z.string().min(1, "Address is required"),
     capacity: z.number().int().positive("Capacity must be a positive integer").optional(),
+    cityId: z.string().optional(),
     userId: z.string().min(1, "User ID is required"),
 });
 
@@ -29,12 +31,13 @@ export default class CreateVenueService {
             throw ValidationError(validationErrors.join("; "));
         }
 
-        const { name, address, capacity, userId } = validationResult.data;
+        const { name, address, capacity, cityId, userId } = validationResult.data;
 
         return this.venueRepository.create({
             name,
             address,
             capacity,
+            cityId,
             createdBy: userId,
         });
     }

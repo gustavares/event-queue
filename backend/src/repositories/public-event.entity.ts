@@ -28,6 +28,7 @@ export interface PublicEventEntity {
     venueAddress: string | null;
     cityId: string;
     cityName: string;
+    cityState: string;
     citySlug: string;
     /** BR-DISC-007 — set for CURATED events only. */
     externalTicketUrl: string | null;

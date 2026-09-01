@@ -15,6 +15,7 @@ function mapToVenueEntity(row: VenueSchema): VenueEntity {
         name: row.name,
         address: row.address,
         capacity: row.capacity,
+        cityId: row.cityId,
         createdBy: row.createdBy,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -31,6 +32,7 @@ export default class DrizzlePostgresVenueRepository implements VenueRepository {
                 name: input.name,
                 address: input.address,
                 capacity: input.capacity,
+                cityId: input.cityId ?? null,
                 createdBy: input.createdBy,
             })
             .returning();

@@ -7,18 +7,19 @@ interface GraphQLCreateVenueInput {
     name: string;
     address: string;
     capacity?: number;
+    cityId?: string;
 }
 
 export async function createVenue(
-    _parent: any,
+    _parent: unknown,
     args: { input: GraphQLCreateVenueInput },
     context: AppGraphQLContext
 ): Promise<VenueEntity> {
     const user = requireAuth(context);
 
-    const { name, address, capacity } = args.input;
+    const { name, address, capacity, cityId } = args.input;
     const { createVenueService } = context.services;
-    const serviceInput: CreateVenueData = { name, address, capacity, userId: user.id };
+    const serviceInput: CreateVenueData = { name, address, capacity, cityId, userId: user.id };
 
     const result = await createVenueService.run(serviceInput);
     return result;
