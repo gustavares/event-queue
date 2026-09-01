@@ -20,6 +20,8 @@ import TransitionEventService from './domain/events/transition-event.service';
 import DeleteEventService from './domain/events/delete-event.service';
 import GetEventsService from './domain/events/get-events.service';
 import ManageTiersService from './domain/events/manage-tiers.service';
+import GetVenuesService from './domain/venues/get-venues.service';
+import GetEventRelationsService from './domain/events/get-event-relations.service';
 import { verifyToken } from './domain/auth/common/jwt.service';
 
 dotenv.config();
@@ -49,19 +51,21 @@ async function startServer() {
     const deleteEventService = new DeleteEventService(eventRepository, eventTeamMemberRepository);
     const getEventsService = new GetEventsService(eventRepository, eventTeamMemberRepository);
     const manageTiersService = new ManageTiersService(doorSaleTierRepository, eventTeamMemberRepository);
+    const getVenuesService = new GetVenuesService(venueRepository);
+    const getEventRelationsService = new GetEventRelationsService(userRepository, doorSaleTierRepository);
 
     const services = {
         signUpService,
         signInService,
         createVenueService,
-        venueRepository,
+        getVenuesService,
         createEventService,
         updateEventService,
         transitionEventService,
         deleteEventService,
         getEventsService,
         manageTiersService,
-        doorSaleTierRepository,
+        getEventRelationsService,
     };
 
     const yoga = createYoga<object, AppGraphQLContext>({

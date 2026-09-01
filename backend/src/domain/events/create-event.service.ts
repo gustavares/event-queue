@@ -1,3 +1,4 @@
+import { ValidationError } from "../common/errors";
 import { z } from "zod";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
@@ -52,7 +53,12 @@ export default class CreateEventService {
     ) {}
 
     async run(input: CreateEventData): Promise<EventEntity> {
-        const validated = schema.parse(input);
+        const parsed = schema.safeParse(input);
+        if (!parsed.success) {
+            throw ValidationError(parsed.error.issues.map((i) => i.message).join("; "));
+        }
+        const validated = parsed.data;
+
 
         const endDate = validated.endDate ?? new Date(validated.startDate.getTime() + 12 * 60 * 60 * 1000);
         const locationName = validated.venueId ? undefined : validated.locationName;

@@ -19,22 +19,17 @@ export async function createEvent(
 ) {
     const user = requireAuth(context);
 
-    try {
-        const { name, description, startDate, endDate, venueId, locationName, locationAddress, doorSalesEnabled } = args.input;
+    const { name, description, startDate, endDate, venueId, locationName, locationAddress, doorSalesEnabled } = args.input;
 
-        return await context.services.createEventService.run({
-            name,
-            description,
-            startDate,
-            endDate,
-            venueId,
-            locationName,
-            locationAddress,
-            doorSalesEnabled,
-            userId: user.id,
-        });
-    } catch (error) {
-        console.error("createEvent handler error:", error);
-        throw error instanceof Error ? error : new Error(String(error));
-    }
+    return await context.services.createEventService.run({
+        name,
+        description,
+        startDate,
+        endDate,
+        venueId,
+        locationName,
+        locationAddress,
+        doorSalesEnabled,
+        userId: user.id,
+    });
 }

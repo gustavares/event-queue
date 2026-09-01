@@ -8,11 +8,6 @@ export async function removeDoorSaleTier(
 ) {
     const user = requireAuth(context);
 
-    try {
-        await context.services.manageTiersService.removeTier(args.id, user.id);
-        return true;
-    } catch (error) {
-        console.error("removeDoorSaleTier error:", error);
-        throw new Error(error instanceof Error ? error.message : "Failed to remove tier");
-    }
+    await context.services.manageTiersService.removeTier(args.id, user.id);
+    return true;
 }

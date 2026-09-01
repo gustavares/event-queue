@@ -14,9 +14,7 @@ import { addDoorSaleTier } from '../handlers/events/add-tier.handler';
 import { updateDoorSaleTier } from '../handlers/events/update-tier.handler';
 import { removeDoorSaleTier } from '../handlers/events/remove-tier.handler';
 import { dateTimeScalar } from '../schema/scalars';
-import { AppGraphQLContext } from '../graphql.types';
-import { user } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { Event } from './event.resolver';
 
 export const resolvers = {
     DateTime: dateTimeScalar,
@@ -42,21 +40,5 @@ export const resolvers = {
         removeDoorSaleTier,
     },
 
-    Event: {
-        venue: async (parent: any, _args: any, context: AppGraphQLContext) => {
-            if (!parent.venueId) return null;
-            return context.services.venueRepository.findById(parent.venueId);
-        },
-        doorSaleTiers: async (parent: any, _args: any, context: AppGraphQLContext) => {
-            return context.services.doorSaleTierRepository.findByEventId(parent.id);
-        },
-        createdBy: async (parent: any, _args: any, context: AppGraphQLContext) => {
-            const result = await context.db
-                .select({ id: user.id, email: user.email, name: user.name })
-                .from(user)
-                .where(eq(user.id, parent.createdBy))
-                .limit(1);
-            return result[0] || null;
-        },
-    },
+    Event,
 };

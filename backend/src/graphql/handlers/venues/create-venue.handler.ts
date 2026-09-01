@@ -20,11 +20,6 @@ export async function createVenue(
     const { createVenueService } = context.services;
     const serviceInput: CreateVenueData = { name, address, capacity, userId: user.id };
 
-    try {
-        const result = await createVenueService.run(serviceInput);
-        return result;
-    } catch (error: any) {
-        console.error("Create Venue Handler Error:", error.message);
-        throw new Error(error.message || "An error occurred while creating the venue.");
-    }
+    const result = await createVenueService.run(serviceInput);
+    return result;
 }

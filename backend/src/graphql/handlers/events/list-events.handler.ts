@@ -8,10 +8,5 @@ export async function listEvents(
 ) {
     const user = requireAuth(context);
 
-    try {
-        return await context.services.getEventsService.listByCreator(user.id);
-    } catch (error) {
-        console.error("listEvents handler error:", error);
-        throw error instanceof Error ? error : new Error(String(error));
-    }
+    return await context.services.getEventsService.listByCreator(user.id);
 }

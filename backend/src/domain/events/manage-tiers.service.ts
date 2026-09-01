@@ -1,3 +1,4 @@
+import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
 import { z } from "zod";
 import { DoorSaleTierRepository } from "../../repositories/door-sale-tier.repository";
 import { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
@@ -26,12 +27,12 @@ export default class ManageTiersService {
     ): Promise<DoorSaleTierEntity> {
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(eventId, userId);
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to manage tiers for this event");
+            throw ForbiddenError("You do not have permission to manage tiers for this event");
         }
 
         const result = addTierSchema.safeParse(input);
         if (!result.success) {
-            throw new Error("Please provide a tier name and a price greater than zero");
+            throw ValidationError("Please provide a tier name and a price greater than zero");
         }
 
         return this.doorSaleTierRepository.create({
@@ -48,17 +49,17 @@ export default class ManageTiersService {
     ): Promise<DoorSaleTierEntity> {
         const tier = await this.doorSaleTierRepository.findById(tierId);
         if (!tier) {
-            throw new Error("Tier not found");
+            throw NotFoundError("Tier not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(tier.eventId, userId);
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to manage tiers for this event");
+            throw ForbiddenError("You do not have permission to manage tiers for this event");
         }
 
         const result = updateTierSchema.safeParse(input);
         if (!result.success) {
-            throw new Error("Please provide a tier name and a price greater than zero");
+            throw ValidationError("Please provide a tier name and a price greater than zero");
         }
 
         return this.doorSaleTierRepository.update(tierId, result.data);
@@ -67,12 +68,12 @@ export default class ManageTiersService {
     async removeTier(tierId: string, userId: string): Promise<void> {
         const tier = await this.doorSaleTierRepository.findById(tierId);
         if (!tier) {
-            throw new Error("Tier not found");
+            throw NotFoundError("Tier not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(tier.eventId, userId);
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to manage tiers for this event");
+            throw ForbiddenError("You do not have permission to manage tiers for this event");
         }
 
         await this.doorSaleTierRepository.delete(tierId);

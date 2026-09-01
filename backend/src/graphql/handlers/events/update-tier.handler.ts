@@ -8,14 +8,9 @@ export async function updateDoorSaleTier(
 ) {
     const user = requireAuth(context);
 
-    try {
-        return await context.services.manageTiersService.updateTier(
-            args.id,
-            user.id,
-            args.input,
-        );
-    } catch (error) {
-        console.error("updateDoorSaleTier error:", error);
-        throw new Error(error instanceof Error ? error.message : "Failed to update tier");
-    }
+    return await context.services.manageTiersService.updateTier(
+        args.id,
+        user.id,
+        args.input,
+    );
 }

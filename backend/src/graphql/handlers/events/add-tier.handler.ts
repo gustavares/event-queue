@@ -8,14 +8,9 @@ export async function addDoorSaleTier(
 ) {
     const user = requireAuth(context);
 
-    try {
-        return await context.services.manageTiersService.addTier(
-            args.eventId,
-            user.id,
-            args.input,
-        );
-    } catch (error) {
-        console.error("addDoorSaleTier error:", error);
-        throw new Error(error instanceof Error ? error.message : "Failed to add tier");
-    }
+    return await context.services.manageTiersService.addTier(
+        args.eventId,
+        user.id,
+        args.input,
+    );
 }

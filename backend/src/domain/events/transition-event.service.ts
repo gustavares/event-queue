@@ -1,3 +1,4 @@
+import { ConflictError, ForbiddenError, NotFoundError } from "../common/errors";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
 import type { EventEntity, EventStatus } from "../../repositories/event.entity";
@@ -24,7 +25,7 @@ export default class TransitionEventService {
     async run(input: TransitionEventData): Promise<EventEntity> {
         const event = await this.eventRepository.findById(input.eventId);
         if (!event) {
-            throw new Error("Event not found");
+            throw NotFoundError("Event not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(
@@ -32,12 +33,12 @@ export default class TransitionEventService {
             input.userId
         );
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to edit this event");
+            throw ForbiddenError("You do not have permission to edit this event");
         }
 
         const allowed = ALLOWED_TRANSITIONS[event.status];
         if (!allowed.includes(input.targetStatus)) {
-            throw new Error("This event cannot be changed to that status");
+            throw ConflictError("This event cannot be changed to that status");
         }
 
         return this.eventRepository.update(input.eventId, { status: input.targetStatus });

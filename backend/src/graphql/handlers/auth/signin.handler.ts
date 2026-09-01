@@ -19,11 +19,6 @@ export async function signIn(
         password,
     };
 
-    try {
-        const result = await signInService.run(serviceInput);
-        return result;
-    } catch (error: any) {
-        console.error("Sign In Handler Error:", error.message);
-        throw new Error(error.message || 'An error occurred during sign in.');
-    }
+    const result = await signInService.run(serviceInput);
+    return result;
 }

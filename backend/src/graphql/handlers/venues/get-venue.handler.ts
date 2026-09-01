@@ -3,19 +3,11 @@ import { AppGraphQLContext } from "../../graphql.types";
 import { requireAuth } from "../common/require-auth";
 
 export async function getVenue(
-    _parent: any,
+    _parent: unknown,
     args: { id: string },
     context: AppGraphQLContext
 ): Promise<VenueEntity | null> {
-    const user = requireAuth(context);
+    requireAuth(context);
 
-    const { venueRepository } = context.services;
-
-    try {
-        const result = await venueRepository.findById(args.id);
-        return result;
-    } catch (error: any) {
-        console.error("Get Venue Handler Error:", error.message);
-        throw new Error(error.message || "An error occurred while fetching the venue.");
-    }
+    return context.services.getVenuesService.getById(args.id);
 }

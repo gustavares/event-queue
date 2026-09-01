@@ -1,3 +1,4 @@
+import { ValidationError } from "../../common/errors";
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import dotenv from 'dotenv';
 
@@ -64,6 +65,6 @@ export async function verifyToken(token: string): Promise<UserJWTPayload> {
     } catch (error) {
         console.error("Error verifying JWT:", error);
         // TODO: differentiate errors (e.g., expired, invalid signature)
-        throw new Error("Invalid or expired authentication token.");
+        throw ValidationError("Invalid or expired authentication token.");
     }
 }

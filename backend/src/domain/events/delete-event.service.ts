@@ -1,3 +1,4 @@
+import { ForbiddenError, NotFoundError } from "../common/errors";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
 
@@ -15,7 +16,7 @@ export default class DeleteEventService {
     async run(input: DeleteEventData): Promise<void> {
         const event = await this.eventRepository.findById(input.eventId);
         if (!event) {
-            throw new Error("Event not found");
+            throw NotFoundError("Event not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(
@@ -23,7 +24,7 @@ export default class DeleteEventService {
             input.userId
         );
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to edit this event");
+            throw ForbiddenError("You do not have permission to edit this event");
         }
 
         await this.eventRepository.softDelete(input.eventId);

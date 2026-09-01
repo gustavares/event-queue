@@ -1,3 +1,4 @@
+import { ConflictError, ValidationError } from "../common/errors";
 import { z } from "zod";
 import { UserRepository } from "../../repositories/user.repository";
 import { hashPassword } from "./common/password.service";
@@ -32,14 +33,14 @@ export default class SignUpService {
         if (!validationResult.success) {
             // TODO: Create custom domain error that wraps ZodError or formats its messages
             const validationErrors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-            throw new Error(`Input validation failed: ${validationErrors.join('; ')}`);
+            throw ValidationError(validationErrors.join("; "));
         }
         const { name, email, password } = validationResult.data;
 
         const userExists = await this.userRepository.findByEmail(email) !== null ? true : false;
         if (userExists) {
             // TODO: Create custom domain error
-            throw new Error(`${email} already registered`);
+            throw ConflictError("An account with this email already exists");
         }
 
         const hashedPassword = await hashPassword(password);

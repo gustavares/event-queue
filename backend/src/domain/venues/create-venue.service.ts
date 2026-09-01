@@ -1,3 +1,4 @@
+import { ValidationError } from "../common/errors";
 import { z } from "zod";
 import { VenueRepository } from "../../repositories/venue.repository";
 import { VenueEntity } from "../../repositories/venue.entity";
@@ -25,7 +26,7 @@ export default class CreateVenueService {
         const validationResult = CreateVenueSchema.safeParse(inputData);
         if (!validationResult.success) {
             const validationErrors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-            throw new Error(`Input validation failed: ${validationErrors.join('; ')}`);
+            throw ValidationError(validationErrors.join("; "));
         }
 
         const { name, address, capacity, userId } = validationResult.data;

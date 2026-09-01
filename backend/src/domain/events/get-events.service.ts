@@ -1,3 +1,4 @@
+import { ForbiddenError, NotFoundError } from "../common/errors";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
 import type { EventEntity } from "../../repositories/event.entity";
@@ -11,12 +12,12 @@ export default class GetEventsService {
     async getById(eventId: string, userId: string): Promise<EventEntity> {
         const event = await this.eventRepository.findById(eventId);
         if (!event) {
-            throw new Error("Event not found");
+            throw NotFoundError("Event not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(eventId, userId);
         if (!membership) {
-            throw new Error("You do not have permission to view this event");
+            throw ForbiddenError("You do not have permission to view this event");
         }
 
         return this.applyAutoClose(event);

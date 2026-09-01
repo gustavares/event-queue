@@ -8,10 +8,5 @@ export async function getEvent(
 ) {
     const user = requireAuth(context);
 
-    try {
-        return await context.services.getEventsService.getById(args.id, user.id);
-    } catch (error) {
-        console.error("getEvent handler error:", error);
-        throw error instanceof Error ? error : new Error(String(error));
-    }
+    return await context.services.getEventsService.getById(args.id, user.id);
 }

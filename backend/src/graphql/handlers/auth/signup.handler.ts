@@ -22,12 +22,6 @@ export async function signUp(
         name,
     };
 
-    try {
-        const result = await signUpService.run(serviceInput);
-        return result;
-    } catch (error: any) {
-        // TODO: improve error handling
-        console.error("Sign Up Handler Error:", error.message);
-        throw new Error(error.message || 'An error occurred during sign up.');
-    }
+    const result = await signUpService.run(serviceInput);
+    return result;
 }

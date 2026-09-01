@@ -1,10 +1,11 @@
 import { CreateUserDbInput, UserEntity, UserSchema } from "./user.entity";
 import { user } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { Database } from "../db";
 
 export interface UserRepository {
     create(input: CreateUserDbInput): Promise<UserEntity>;
+    findById(id: string): Promise<UserEntity | null>;
     findByEmail(email: string): Promise<UserEntity | null>;
     findUserByEmailWithPassword(email: string): Promise<UserSchema | null>;
 }
@@ -31,6 +32,19 @@ export default class DrizzlePostgresUserRepository implements UserRepository {
             .values(newUserForDb)
             .returning();
 
+        return mapToUserEntity(result[0]);
+    }
+
+    async findById(id: string): Promise<UserEntity | null> {
+        const result: UserSchema[] = await this.db
+            .select()
+            .from(user)
+            .where(and(eq(user.id, id), eq(user.deleted, false)))
+            .limit(1);
+
+        if (result.length === 0) {
+            return null;
+        }
         return mapToUserEntity(result[0]);
     }
 

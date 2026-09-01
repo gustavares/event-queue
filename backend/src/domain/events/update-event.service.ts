@@ -1,3 +1,4 @@
+import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
 import { z } from "zod";
 import type { EventRepository } from "../../repositories/event.repository";
 import type { EventTeamMemberRepository } from "../../repositories/event-team-member.repository";
@@ -46,11 +47,16 @@ export default class UpdateEventService {
     ) {}
 
     async run(input: UpdateEventData): Promise<EventEntity> {
-        const validated = schema.parse(input);
+        const parsed = schema.safeParse(input);
+        if (!parsed.success) {
+            throw ValidationError(parsed.error.issues.map((i) => i.message).join("; "));
+        }
+        const validated = parsed.data;
+
 
         const event = await this.eventRepository.findById(validated.eventId);
         if (!event) {
-            throw new Error("Event not found");
+            throw NotFoundError("Event not found");
         }
 
         const membership = await this.eventTeamMemberRepository.findByEventAndUser(
@@ -58,7 +64,7 @@ export default class UpdateEventService {
             validated.userId
         );
         if (!membership || membership.role !== "MANAGER") {
-            throw new Error("You do not have permission to edit this event");
+            throw ForbiddenError("You do not have permission to edit this event");
         }
 
         const locationName = validated.venueId !== undefined ? null : validated.locationName;

@@ -1,3 +1,4 @@
+import { ValidationError } from "../common/errors";
 import { z } from "zod";
 import { UserRepository } from "../../repositories/user.repository";
 import { verifyPassword } from "./common/password.service";
@@ -29,18 +30,18 @@ export default class SignInService {
 
         if (!validationResult.success) {
             const validationErrors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-            throw new Error(`Input validation failed: ${validationErrors.join('; ')}`);
+            throw ValidationError(validationErrors.join("; "));
         }
         const { email, password } = validationResult.data;
 
         const userWithPassword = await this.userRepository.findUserByEmailWithPassword(email);
         if (!userWithPassword) {
-            throw new Error("Invalid email or password");
+            throw ValidationError("Invalid email or password");
         }
 
         const isPasswordValid = await verifyPassword(userWithPassword.password, password);
         if (!isPasswordValid) {
-            throw new Error("Invalid email or password");
+            throw ValidationError("Invalid email or password");
         }
 
         const { password: _, ...userEntity } = userWithPassword;
