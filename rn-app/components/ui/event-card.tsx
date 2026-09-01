@@ -14,8 +14,15 @@ interface EventCardEvent {
   startDate: string | Date;
   endDate?: string | Date;
   status: EventStatus;
-  venue?: string;
-  locationName?: string;
+  /**
+   * The full Venue object, as the schema returns it — not a name.
+   *
+   * This was previously typed `venue?: string`, which rendered the object straight into
+   * a Text node and crashed with "Objects are not valid as a React child". It never
+   * surfaced while every event used an inline location and `venue` was null.
+   */
+  venue?: { id: string; name: string; address: string } | null;
+  locationName?: string | null;
 }
 
 interface EventCardProps {
@@ -45,7 +52,7 @@ function formatEventDate(date: string | Date): string {
 export function EventCard({ event, onPress }: EventCardProps) {
   const colors = useThemeColors();
   const accentColor = statusAccent(event.status, colors);
-  const locationLabel = event.venue ?? event.locationName;
+  const locationLabel = event.venue?.name ?? event.locationName ?? null;
 
   return (
     <Pressable
