@@ -252,6 +252,30 @@ Review generated SQL before applying, and commit it.
 - Every repository read path on a soft-deletable entity filters `deleted = false`. This is not
   optional and not the caller's job — a single unfiltered read leaks deleted data everywhere
 
+## Testing
+
+Jest + ts-jest, `backend/src/**/*.test.ts`, colocated with what they test.
+
+**Tests run against a real Postgres**, not mocks — the defects this codebase actually shipped
+(a missing transaction, a soft-delete filter bypassed, tiers deleted on disable) are all
+behaviours a mocked repository would have happily faked.
+
+- The suite targets **`<db>_test`**, never the development database. `src/test/setup.ts`
+  rewrites `DATABASE_URL` automatically; `resetDatabase()` truncates every table between cases
+- After any `pnpm db:generate`, run **`pnpm db:migrate` and `pnpm test:db:migrate`** — the test
+  database is migrated separately, and a stale one fails with a confusing missing-column error
+- `maxWorkers: 1` — the suite shares one database
+- `setup.ts` deletes `ANTHROPIC_API_KEY` so no test can reach the network. Suites that exercise
+  extraction inject a fake `EventExtractor`
+
+```typescript
+beforeEach(async () => { await resetDatabase(); });
+afterAll(async () => { await closeTestDb(); });
+```
+
+**What must have a test:** anything where being wrong is silent. Public-surface field exposure
+(BR-DISC-005), authorization boundaries, soft-delete filtering, and transactional writes.
+
 ## Frontend Patterns
 
 ### Design tokens
