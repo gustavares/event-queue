@@ -57,6 +57,7 @@ export async function confirmCuratedEvent(
             venueName: string;
             venueAddress: string;
             externalTicketUrl: string;
+            priceFrom?: number;
             description?: string;
             curatorNote?: string;
             lineup?: { name: string; isHeadliner?: boolean }[];

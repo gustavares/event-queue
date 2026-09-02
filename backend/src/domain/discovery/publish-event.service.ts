@@ -28,14 +28,20 @@ export default class PublishEventService {
         private readonly slugExists: (slug: string) => Promise<boolean>
     ) {}
 
+    /**
+     * Loads an event the caller manages.
+     *
+     * Absent and not-yours deliberately return the SAME error. Distinguishing them turns the
+     * mutation into an existence oracle: any signed-in user could probe ids and learn which
+     * events exist from whether they got NOT_FOUND or FORBIDDEN.
+     */
     private async requireManager(eventId: string, userId: string) {
         const event = await this.eventRepository.findById(eventId);
-        if (!event) {
-            throw NotFoundError("Event not found");
-        }
+        const membership = event
+            ? await this.eventTeamMemberRepository.findByEventAndUser(eventId, userId)
+            : null;
 
-        const membership = await this.eventTeamMemberRepository.findByEventAndUser(eventId, userId);
-        if (!membership || membership.role !== "MANAGER") {
+        if (!event || !membership || membership.role !== "MANAGER") {
             throw ForbiddenError("You don't have access to that.");
         }
 
@@ -64,6 +70,17 @@ export default class PublishEventService {
             throw ValidationError("Add a city before publishing.");
         }
 
+        // The event stores an OVERRIDE, never a copy. When the resolved city is the one the
+        // venue already supplies, clear the column so the venue stays the single source of
+        // truth and the listing follows it if the venue is later corrected. Only a city that
+        // differs from the venue's is worth persisting on the event.
+        //
+        // The previous form — `venueCityId === cityId ? event.cityId : cityId` — wrote the
+        // event's own stale cityId back whenever the supplied city matched the venue, so a
+        // Manager could never correct a wrong city; and it left the two columns disagreeing,
+        // which the listing join then read as two separate cities.
+        const cityOverride = cityId === venueCityId ? null : cityId;
+
         // BR-DISC-008 / EDGE-9 — allocate once, then never change it. Re-publishing an
         // event that was previously public must reuse its original slug so old links work.
         const slug =
@@ -73,10 +90,7 @@ export default class PublishEventService {
         await this.eventRepository.setPublication(input.eventId, {
             visibility: "PUBLIC",
             slug,
-            // Store the city on the event unless the venue already supplies exactly it —
-            // then the venue stays the single source of truth. Writing null here whenever
-            // the event has a venue would silently discard an explicit cityId.
-            cityId: venueCityId === cityId ? event.cityId : cityId,
+            cityId: cityOverride,
         });
 
         const published = await this.publicEventRepository.findBySlug(slug);

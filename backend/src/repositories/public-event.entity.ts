@@ -1,7 +1,9 @@
-import { EventStatus } from './event.entity';
+import { EventStatus, EventSource } from './event.entity';
 
-export type EventVisibility = 'PUBLIC' | 'UNLISTED';
-export type EventSource = 'FIRST_PARTY' | 'CURATED';
+// EventVisibility and EventSource live in event.entity.ts. Re-declaring them here created a
+// second, structurally identical type that nothing imported — two sources of truth for the
+// same enum, free to drift.
+export type { EventSource } from './event.entity';
 
 /**
  * The public projection of an event.
@@ -30,10 +32,10 @@ export interface PublicEventEntity {
     cityName: string;
     cityState: string;
     citySlug: string;
+    /** AC-6. Lowest advertised entry price in BRL, or null when none is published. */
+    priceFrom: number | null;
     /** BR-DISC-007 — set for CURATED events only. */
     externalTicketUrl: string | null;
-    featuredFrom: Date | null;
-    featuredUntil: Date | null;
 }
 
 export interface PublicEventFilter {

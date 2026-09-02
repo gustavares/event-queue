@@ -9,10 +9,14 @@ export const MY_EVENTS_QUERY = gql`
       startDate
       endDate
       status
+      visibility
+      slug
+      curatorNote
       venue {
         id
         name
         address
+        city { id name slug }
       }
       locationName
       locationAddress
@@ -36,10 +40,14 @@ export const GET_EVENT_QUERY = gql`
       startDate
       endDate
       status
+      visibility
+      slug
+      curatorNote
       venue {
         id
         name
         address
+        city { id name slug }
       }
       locationName
       locationAddress
@@ -78,10 +86,14 @@ export const UPDATE_EVENT_MUTATION = gql`
       startDate
       endDate
       status
+      visibility
+      slug
+      curatorNote
       venue {
         id
         name
         address
+        city { id name slug }
       }
       locationName
       locationAddress

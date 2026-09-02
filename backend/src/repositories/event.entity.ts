@@ -21,6 +21,7 @@ export interface EventEntity {
     slug: string | null;
     cityId: string | null;
     externalTicketUrl: string | null;
+    priceFrom: number | null;
     curatorNote: string | null;
     sourceUrl: string | null;
     featuredFrom: Date | null;

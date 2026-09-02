@@ -14,16 +14,35 @@ if (!process.env.DATABASE_URL) {
 
 /**
  * Tests truncate every table between cases, so they must never point at the development
- * database. Redirect to a sibling `<db>_test` unless TEST_DATABASE_URL says otherwise.
- * Create it once with:  pnpm test:db:setup
+ * database. Redirect to a sibling `<db>_test`.
+ *
+ * Set up the test database once with:  pnpm test:db:create && pnpm test:db:migrate
+ *
+ * An explicit TEST_DATABASE_URL is honoured but still has to end in `_test`. Without that
+ * guard, a stray value silently pointed the suite at a real database and the first
+ * `resetDatabase()` would have truncated it — and `test:db:migrate` derives its own URL, so
+ * the two could migrate one database and wipe another.
  */
-if (!process.env.TEST_DATABASE_URL) {
-    const url = new URL(process.env.DATABASE_URL);
+function testDatabaseUrl(): string {
+    const explicit = process.env.TEST_DATABASE_URL;
+    if (explicit) {
+        if (!new URL(explicit).pathname.endsWith("_test")) {
+            throw new Error(
+                `TEST_DATABASE_URL must name a database ending in "_test" — refusing to run a ` +
+                    `suite that truncates every table against "${new URL(explicit).pathname.slice(1)}".`
+            );
+        }
+        return explicit;
+    }
+
+    const url = new URL(process.env.DATABASE_URL as string);
     if (!url.pathname.endsWith("_test")) {
         url.pathname = `${url.pathname}_test`;
     }
-    process.env.TEST_DATABASE_URL = url.toString();
+    return url.toString();
 }
+
+process.env.TEST_DATABASE_URL = testDatabaseUrl();
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 
 // The extractor must never reach the network during tests, even if a real key is

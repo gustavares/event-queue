@@ -14,8 +14,11 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 async function main() {
     dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-    const base = process.env.DATABASE_URL;
-    if (!base) throw new Error("DATABASE_URL is not set.");
+    // Honour TEST_DATABASE_URL when set, exactly as setup.ts does — otherwise this could
+    // migrate one database while the suite truncated another.
+    const explicit = process.env.TEST_DATABASE_URL;
+    const base = explicit ?? process.env.DATABASE_URL;
+    if (!base) throw new Error("Neither TEST_DATABASE_URL nor DATABASE_URL is set.");
 
     const url = new URL(base);
     if (!url.pathname.endsWith("_test")) url.pathname = `${url.pathname}_test`;

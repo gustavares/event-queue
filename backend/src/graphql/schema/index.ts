@@ -38,6 +38,8 @@ export const typeDefs = gql`
     id: ID!
     email: String!
     name: String!
+    "BR-CUR-001. Gates the curation screen in the client."
+    isCurator: Boolean!
   }
 
   type Venue {
@@ -64,6 +66,13 @@ export const typeDefs = gql`
     createdBy: User!
     createdAt: DateTime!
     updatedAt: DateTime!
+
+    # Publication state, for the Manager's own view of their event. These are on the
+    # AUTHENTICATED type only — PublicEvent stays a separate allowlist (BR-DISC-005).
+    visibility: EventVisibility!
+    "The public URL slug once published; null while the event has never been listed."
+    slug: String
+    curatorNote: String
   }
 
   type DoorSaleTier {
@@ -176,6 +185,8 @@ export const typeDefs = gql`
     city: City!
     genres: [Genre!]!
     lineup: [LineupEntry!]!
+    "AC-6. Lowest advertised entry price in BRL, or null when none is published."
+    priceFrom: Float
     "Set only for CURATED events - where tickets are actually sold (BR-DISC-007)."
     externalTicketUrl: String
   }
@@ -221,6 +232,8 @@ export const typeDefs = gql`
     venueName: String!
     venueAddress: String!
     externalTicketUrl: String!
+    "AC-6. Lowest advertised entry price in BRL."
+    priceFrom: Float
     "Our own copy — never the source's (BR-CUR-004/006)."
     description: String
     curatorNote: String

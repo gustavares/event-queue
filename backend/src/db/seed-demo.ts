@@ -39,6 +39,11 @@ const ACCOUNTS = [
     { email: "manager@eventqueue.dev", name: "Bia (manager)", isCurator: false },
 ];
 
+/** An instant in the past, regardless of the hour the seed happens to run at. */
+function hoursAgo(hours: number): Date {
+    return new Date(Date.now() - hours * 60 * 60 * 1000);
+}
+
 function at(daysFromNow: number, hour: number): Date {
     const d = new Date();
     d.setDate(d.getDate() + daysFromNow);
@@ -195,8 +200,11 @@ async function main() {
         },
         {
             // Already started — must not appear in "upcoming" (EDGE-1).
+            // Two hours ago, not "today at 01:00": the latter is in the FUTURE whenever the
+            // seed runs before 01:00, and the printed summary then claimed it was hidden
+            // while the listing showed it.
             name: "Já Começou",
-            venue: "rooftop", owner: managerId, start: at(0, 1), publish: true,
+            venue: "rooftop", owner: managerId, start: hoursAgo(2), publish: true,
             genres: ["house"],
         },
     ];
@@ -250,7 +258,8 @@ async function main() {
             );
         }
 
-        const listed = Boolean(s.publish) && s.venue !== "semcidade" && s.name !== "Já Começou";
+        const listed =
+            Boolean(s.publish) && s.venue !== "semcidade" && s.start.getTime() > Date.now();
         created.push({
             name: s.name,
             slug,
@@ -259,7 +268,7 @@ async function main() {
                 ? "unlisted — use it to test the 404"
                 : s.venue === "semcidade"
                   ? "venue has no city (EDGE-3)"
-                  : s.name === "Já Começou"
+                  : s.start.getTime() <= Date.now()
                     ? "already started (EDGE-1)"
                     : undefined,
         });

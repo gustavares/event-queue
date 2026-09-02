@@ -6,7 +6,6 @@ import { Database } from "../db";
 export interface SubscriberRepository {
     /** BR-SUB-002 — idempotent. Returns the existing row when already subscribed. */
     subscribe(input: CreateSubscriberDbInput): Promise<SubscriberEntity>;
-    countForCity(cityId: string): Promise<number>;
 }
 
 function mapToSubscriberEntity(row: SubscriberSchema): SubscriberEntity {
@@ -40,11 +39,4 @@ export default class DrizzlePostgresSubscriberRepository implements SubscriberRe
         return mapToSubscriberEntity(rows[0]);
     }
 
-    async countForCity(cityId: string): Promise<number> {
-        const rows = await this.db
-            .select({ id: subscriber.id })
-            .from(subscriber)
-            .where(eq(subscriber.cityId, cityId));
-        return rows.length;
-    }
 }

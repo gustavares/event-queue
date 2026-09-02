@@ -14,8 +14,12 @@ import { GraphQLError } from "graphql";
  * See docs/patterns.md § Error handling.
  */
 
-function domainError(message: string, code: string): GraphQLError {
-    return new GraphQLError(message, { extensions: { code } });
+function domainError(
+    message: string,
+    code: string,
+    extra?: Record<string, unknown>
+): GraphQLError {
+    return new GraphQLError(message, { extensions: { code, ...extra } });
 }
 
 /** Input failed validation, or a business rule rejected it. */
@@ -38,7 +42,15 @@ export function ForbiddenError(message: string): GraphQLError {
     return domainError(message, "FORBIDDEN");
 }
 
-/** Duplicate, or current state forbids the action. */
-export function ConflictError(message: string): GraphQLError {
-    return domainError(message, "CONFLICT");
+/**
+ * Duplicate, or current state forbids the action.
+ *
+ * `extra` rides along in `extensions` so a client can act on the conflict rather than only
+ * report it — AC-22 shows the curator the listing that already exists, which needs its slug.
+ */
+export function ConflictError(
+    message: string,
+    extra?: Record<string, unknown>
+): GraphQLError {
+    return domainError(message, "CONFLICT", extra);
 }

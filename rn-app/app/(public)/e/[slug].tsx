@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery } from 'urql';
 import { Text } from '~/components/ui/text';
 import { PUBLIC_EVENT_QUERY } from '~/lib/graphql/operations/discovery';
+import { formatFullDate } from '~/lib/datetime';
 
 interface LineupEntry {
     position: number;
@@ -11,12 +12,13 @@ interface LineupEntry {
     artist: { id: string; name: string; externalUrl: string | null };
 }
 
-function formatFullDate(value: string): string {
-    const d = new Date(value);
-    const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
-    const month = d.toLocaleDateString('en-US', { month: 'long' });
-    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    return `${weekday}, ${month} ${d.getDate()} · ${time}`;
+/** Prices are advertised in BRL; "R$ 60" not "$60". */
+function formatPrice(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: value % 1 === 0 ? 0 : 2,
+    }).format(value);
 }
 
 export default function PublicEventScreen() {
@@ -55,9 +57,10 @@ export default function PublicEventScreen() {
         );
     }
 
+    // BR-ART-003 / AC-15 — the lineup renders in the curator's order. Splitting it into
+    // headliners-then-support reordered the bill: an event billed "Dux, Ana Vega (headline)"
+    // was shown as "Ana Vega, Dux", contradicting the order the curator set.
     const lineup: LineupEntry[] = event.lineup ?? [];
-    const headliners = lineup.filter((l) => l.isHeadliner);
-    const support = lineup.filter((l) => !l.isHeadliner);
     const isCurated = event.source === 'CURATED';
     const isCancelled = event.status === 'CANCELLED';
 
@@ -120,35 +123,36 @@ export default function PublicEventScreen() {
                                 Line-up
                             </Text>
                             <View className='gap-1'>
-                                {headliners.map((entry) => (
+                                {lineup.map((entry) => (
                                     <Pressable
                                         key={entry.artist.id}
                                         onPress={() =>
-                                            router.push(
-                                                `/artist/${entry.artist.id}` as never
-                                            )
+                                            router.push(`/artist/${entry.artist.id}` as never)
                                         }
                                     >
-                                        <Text className='text-[24px] font-bold text-foreground'>
-                                            {entry.artist.name}
-                                        </Text>
-                                    </Pressable>
-                                ))}
-                                {support.map((entry) => (
-                                    <Pressable
-                                        key={entry.artist.id}
-                                        onPress={() =>
-                                            router.push(
-                                                `/artist/${entry.artist.id}` as never
-                                            )
-                                        }
-                                    >
-                                        <Text className='text-[16px] text-muted-foreground'>
+                                        <Text
+                                            className={
+                                                entry.isHeadliner
+                                                    ? 'text-[24px] font-bold text-foreground'
+                                                    : 'text-[16px] text-muted-foreground'
+                                            }
+                                        >
                                             {entry.artist.name}
                                         </Text>
                                     </Pressable>
                                 ))}
                             </View>
+                        </View>
+                    )}
+
+                    {typeof event.priceFrom === 'number' && (
+                        <View className='mt-6'>
+                            <Text className='text-[11px] uppercase tracking-widest text-primary font-bold'>
+                                Entrada
+                            </Text>
+                            <Text className='mt-1 font-mono text-[20px] text-foreground'>
+                                a partir de {formatPrice(event.priceFrom)}
+                            </Text>
                         </View>
                     )}
 

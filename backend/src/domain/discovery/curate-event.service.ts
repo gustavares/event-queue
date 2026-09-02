@@ -19,6 +19,7 @@ export interface ConfirmCuratedEventInput {
     venueName: string;
     venueAddress: string;
     externalTicketUrl: string;
+    priceFrom?: number;
     description?: string;
     curatorNote?: string;
     lineup?: { name: string; isHeadliner?: boolean }[];
@@ -62,7 +63,11 @@ export default class CurateEventService {
 
         const existing = await this.eventRepository.findBySourceUrl(sourceUrl);
         if (existing) {
-            throw ConflictError("That event is already listed.");
+            // AC-22 — the slug rides along so the curator can be shown the existing listing
+            // rather than only told one exists.
+            throw ConflictError("That event is already listed.", {
+                existingSlug: existing.slug,
+            });
         }
 
         return this.extractor.extract(sourceUrl);
@@ -74,8 +79,11 @@ export default class CurateEventService {
     ): Promise<PublicEventEntity> {
         const curator = this.requireCurator(user);
 
-        if (await this.eventRepository.findBySourceUrl(input.sourceUrl)) {
-            throw ConflictError("That event is already listed.");
+        const duplicate = await this.eventRepository.findBySourceUrl(input.sourceUrl);
+        if (duplicate) {
+            throw ConflictError("That event is already listed.", {
+                existingSlug: duplicate.slug,
+            });
         }
 
         // BR-CUR-008 / EDGE-7 — a past start date is a misread, not a valid listing.
@@ -92,13 +100,16 @@ export default class CurateEventService {
             );
         }
 
+        // BR-DISC-009. Without this the id goes straight to Postgres as a foreign key and a
+        // typo — or the empty string the curator screen sends when no city is picked —
+        // surfaces as a masked "Unexpected error." rather than something actionable.
+        const city = await this.cityRepository.findById(input.cityId);
+        if (!city) {
+            throw ValidationError("Choose a city before listing this event.");
+        }
+
         const endDate =
             input.endDate ?? new Date(input.startDate.getTime() + 6 * 60 * 60 * 1000);
-
-        const slug = await allocateSlug(
-            buildEventSlug(input.name, input.startDate),
-            (candidate) => this.eventRepository.slugExists(candidate)
-        );
 
         const genres = input.genreSlugs?.length
             ? await this.genreRepository.findBySlugs(input.genreSlugs)
@@ -106,10 +117,18 @@ export default class CurateEventService {
 
         // The event, its lineup and its genres are one listing — a partial write would
         // publish an event with a missing lineup and no way to tell that it was truncated.
-        await this.db.transaction(async (tx) => {
+        // Slug allocation is inside the transaction too: allocating outside it left a window
+        // where two concurrent confirms picked the same slug and the loser died on the unique
+        // index with a masked error.
+        const slug = await this.db.transaction(async (tx) => {
             const txEvents = new DrizzlePostgresEventRepository(tx);
             const txArtists = new DrizzlePostgresArtistRepository(tx);
             const txGenres = new DrizzlePostgresGenreRepository(tx);
+
+            const allocated = await allocateSlug(
+                buildEventSlug(input.name, input.startDate),
+                (candidate) => txEvents.slugExists(candidate)
+            );
 
             const row = await txEvents.create({
                 name: input.name,
@@ -123,8 +142,8 @@ export default class CurateEventService {
 
             await txEvents.setPublication(row.id, {
                 visibility: "PUBLIC",
-                slug,
-                cityId: input.cityId,
+                slug: allocated,
+                cityId: city.id,
             });
 
             await txEvents.setCuratedSource({
@@ -132,7 +151,13 @@ export default class CurateEventService {
                 sourceUrl: input.sourceUrl,
                 externalTicketUrl: input.externalTicketUrl,
                 curatorNote: input.curatorNote ?? null,
+                priceFrom: input.priceFrom ?? null,
             });
+
+            // A curated event still needs an owner, or nobody can ever unpublish or delete it:
+            // publish-event.service.ts authorizes through the team table, and a listing with no
+            // MANAGER row is permanently stuck public.
+            await txEvents.addManager(row.id, curator.id);
 
             if (input.lineup?.length) {
                 await txArtists.replaceLineup(row.id, input.lineup);
@@ -144,14 +169,31 @@ export default class CurateEventService {
                 );
             }
 
-            return row;
-        });
+            return allocated;
+        }).catch(translateUniqueViolation);
 
         const published = await this.publicEventRepository.findBySlug(slug);
         if (!published) {
             throw ValidationError("Add a city before publishing.");
         }
         return published;
+    }
+
+    /**
+     * Resolves an event that is actually publicly listed, BEFORE any write.
+     *
+     * Curation only makes sense on a listed event, and checking afterwards was worse than
+     * useless: for an UNLISTED event carrying a slug, `findById` succeeded, the write
+     * committed, and only then did the public re-read come back empty and throw — so the
+     * curator was told the save failed while the value sat in the database, ready to appear
+     * the moment the event was republished.
+     */
+    private async requireListedEvent(eventId: string) {
+        const event = await this.eventRepository.findById(eventId);
+        if (!event || !event.slug || event.visibility !== "PUBLIC") {
+            throw NotFoundError("This event isn't available.");
+        }
+        return event;
     }
 
     /** BR-CUR-006. Our own copy. */
@@ -161,15 +203,11 @@ export default class CurateEventService {
         note: string
     ): Promise<PublicEventEntity> {
         this.requireCurator(user);
-
-        const event = await this.eventRepository.findById(eventId);
-        if (!event || !event.slug) {
-            throw NotFoundError("This event isn't available.");
-        }
+        const event = await this.requireListedEvent(eventId);
 
         await this.eventRepository.setCuration(eventId, { curatorNote: note });
 
-        const updated = await this.publicEventRepository.findBySlug(event.slug);
+        const updated = await this.publicEventRepository.findBySlug(event.slug!);
         if (!updated) {
             throw NotFoundError("This event isn't available.");
         }
@@ -189,20 +227,39 @@ export default class CurateEventService {
             throw ValidationError("The feature window must end after it starts.");
         }
 
-        const event = await this.eventRepository.findById(eventId);
-        if (!event || !event.slug) {
-            throw NotFoundError("This event isn't available.");
-        }
+        const event = await this.requireListedEvent(eventId);
 
         await this.eventRepository.setCuration(eventId, {
             featuredFrom: from,
             featuredUntil: until,
         });
 
-        const updated = await this.publicEventRepository.findBySlug(event.slug);
+        const updated = await this.publicEventRepository.findBySlug(event.slug!);
         if (!updated) {
             throw NotFoundError("This event isn't available.");
         }
         return updated;
     }
+}
+
+/**
+ * Turns a Postgres unique-violation into the spec's own copy.
+ *
+ * BR-CUR-009's read-then-write check narrows the window but cannot close it; the unique
+ * index on `source_url` is what actually guarantees one listing per source. Without this
+ * translation the loser of a concurrent confirm got "Unexpected error."
+ */
+function translateUniqueViolation(error: unknown): never {
+    const code = (error as { code?: string })?.code;
+    const constraint = (error as { constraint?: string })?.constraint ?? "";
+
+    if (code === "23505") {
+        if (constraint.includes("source_url")) {
+            throw ConflictError("That event is already listed.");
+        }
+        if (constraint.includes("slug")) {
+            throw ConflictError("We couldn't create a link for that event. Try again.");
+        }
+    }
+    throw error;
 }

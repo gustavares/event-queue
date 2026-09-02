@@ -148,6 +148,57 @@ describe("PublicEventRepository", () => {
         });
     });
 
+    describe("BR-DISC-009 — the city resolves to exactly one, never two", () => {
+        it("returns the event ONCE when its own city differs from its venue's", async () => {
+            // publishEvent(id, cityId: <other city>) creates exactly this state: the event
+            // carries an override while the venue keeps its own city. The join used to match
+            // both, duplicating the event and making PublicEvent.city non-deterministic.
+            const [{ id: rioId }] = await testDb
+                .insert(city)
+                .values({ name: "Rio de Janeiro", state: "RJ", slug: "rio-de-janeiro" })
+                .returning({ id: city.id });
+
+            await makeEvent({ cityId: rioId, slug: "dois-lugares" });
+
+            const all = await repo.findMany({});
+            expect(all).toHaveLength(1);
+            expect(all[0].citySlug).toBe("rio-de-janeiro");
+
+            // …and it must NOT appear under the venue's city, which it was moved out of.
+            expect(await repo.findMany({ citySlug: "sao-paulo" })).toHaveLength(0);
+            expect(await repo.findMany({ citySlug: "rio-de-janeiro" })).toHaveLength(1);
+
+            const bySlug = await repo.findBySlug("dois-lugares");
+            expect(bySlug?.citySlug).toBe("rio-de-janeiro");
+        });
+
+        it("falls back to the venue's city when the event has none", async () => {
+            await makeEvent();
+            const found = await repo.findMany({});
+            expect(found).toHaveLength(1);
+            expect(found[0].citySlug).toBe("sao-paulo");
+        });
+    });
+
+    describe("the citySlug filter actually filters", () => {
+        it("excludes events in other cities", async () => {
+            const [{ id: rioId }] = await testDb
+                .insert(city)
+                .values({ name: "Rio de Janeiro", state: "RJ", slug: "rio-de-janeiro" })
+                .returning({ id: city.id });
+
+            await makeEvent({ name: "Em SP", slug: "em-sp" });
+            await makeEvent({ name: "No Rio", slug: "no-rio", cityId: rioId });
+
+            // Without this, deleting the citySlug predicate leaves every other test green.
+            const sp = await repo.findMany({ citySlug: "sao-paulo" });
+            expect(sp.map((e) => e.name)).toEqual(["Em SP"]);
+
+            const rio = await repo.findMany({ citySlug: "rio-de-janeiro" });
+            expect(rio.map((e) => e.name)).toEqual(["No Rio"]);
+        });
+    });
+
     describe("BR-DISC-011 — ordering", () => {
         it("orders by start time ascending", async () => {
             await makeEvent({ name: "Depois", startDate: inDays(9) });
@@ -171,6 +222,23 @@ describe("PublicEventRepository", () => {
         it("excludes an event that was never featured", async () => {
             await makeEvent();
             expect(await repo.findMany({ featuredOnly: true })).toHaveLength(0);
+        });
+
+        it("excludes an event whose feature window has not started yet", async () => {
+            // Exercises the `featuredFrom <= now` half of the predicate. Without this the
+            // whole lower bound could be deleted and every other featuring test still passed.
+            await makeEvent({ featuredFrom: inDays(2), featuredUntil: inDays(9) });
+            expect(await repo.findMany({ featuredOnly: true })).toHaveLength(0);
+        });
+    });
+
+    describe("BR-DISC-010 — the startsBefore window (AC-4)", () => {
+        it("excludes events starting after the window closes", async () => {
+            await makeEvent({ name: "Esta semana", slug: "esta-semana", startDate: inDays(2) });
+            await makeEvent({ name: "Mês que vem", slug: "mes-que-vem", startDate: inDays(40) });
+
+            const soon = await repo.findMany({ startsBefore: inDays(7) });
+            expect(soon.map((e) => e.name)).toEqual(["Esta semana"]);
         });
     });
 

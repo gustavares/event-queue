@@ -10,6 +10,19 @@ import { useAuthStore } from '~/stores/auth.store';
  */
 const UNGATED_GROUPS = ['(auth)', '(public)'];
 
+/**
+ * Routes with no group segment that must not be gated.
+ *
+ * At the root route `/`, expo-router's `useSegments()` returns `[]`, so `segments[0]` is
+ * `undefined` — which matched no ungated group and sent every signed-out visitor to
+ * sign-in, beating `app/index.tsx`'s own redirect to `/discover` and shutting strangers out
+ * of the whole public product. `+not-found` had the same problem: a stale public link gave
+ * a signed-out visitor a login form instead of the not-found page.
+ *
+ * The root owns its own decision (see app/index.tsx); the gate must not race it.
+ */
+const UNGATED_ROOT_SEGMENTS = [undefined, '+not-found'];
+
 export function useAuthGate() {
     const { isAuthenticated, isLoading } = useAuthStore();
     const segments = useSegments();
@@ -20,7 +33,9 @@ export function useAuthGate() {
 
         const group = segments[0];
         const inAuthGroup = group === '(auth)';
-        const isUngated = UNGATED_GROUPS.includes(group as string);
+        const isUngated =
+            UNGATED_ROOT_SEGMENTS.includes(group as string | undefined) ||
+            UNGATED_GROUPS.includes(group as string);
 
         // Signed out on a gated route → sign in.
         if (!isAuthenticated && !isUngated) {

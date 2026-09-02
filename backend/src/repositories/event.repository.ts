@@ -6,7 +6,7 @@ import {
     PublishEventDbInput,
     CurationDbInput,
 } from "./event.entity";
-import { event } from "../db/schema";
+import { event, eventTeamMember } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { Database } from "../db";
 
@@ -21,11 +21,13 @@ export interface EventRepository {
     setPublication(id: string, input: PublishEventDbInput): Promise<EventEntity>;
     setCuration(id: string, input: CurationDbInput): Promise<EventEntity>;
     findBySourceUrl(sourceUrl: string): Promise<EventEntity | null>;
+    addManager(eventId: string, userId: string): Promise<void>;
     setCuratedSource(input: {
         id: string;
         sourceUrl: string;
         externalTicketUrl: string;
         curatorNote: string | null;
+        priceFrom?: number | null;
     }): Promise<EventEntity>;
 }
 
@@ -46,6 +48,7 @@ function mapToEventEntity(row: EventSchema): EventEntity {
         slug: row.slug,
         cityId: row.cityId,
         externalTicketUrl: row.externalTicketUrl,
+        priceFrom: row.priceFrom,
         curatorNote: row.curatorNote,
         sourceUrl: row.sourceUrl,
         featuredFrom: row.featuredFrom,
@@ -161,6 +164,19 @@ export default class DrizzlePostgresEventRepository implements EventRepository {
         return mapToEventEntity(result[0]);
     }
 
+    /**
+     * Gives an event a MANAGER.
+     *
+     * Curated events need one too: authorization for publish/unpublish/delete goes through
+     * the team table, so a listing created without a manager row can never be taken down.
+     */
+    async addManager(eventId: string, userId: string): Promise<void> {
+        await this.db
+            .insert(eventTeamMember)
+            .values({ eventId, userId, role: "MANAGER" })
+            .onConflictDoNothing();
+    }
+
     /** BR-CUR-009. The unique constraint is the real guard; this gives a friendlier path. */
     async findBySourceUrl(sourceUrl: string): Promise<EventEntity | null> {
         const result: EventSchema[] = await this.db
@@ -178,6 +194,7 @@ export default class DrizzlePostgresEventRepository implements EventRepository {
         sourceUrl: string;
         externalTicketUrl: string;
         curatorNote: string | null;
+        priceFrom?: number | null;
     }): Promise<EventEntity> {
         const result: EventSchema[] = await this.db
             .update(event)
@@ -186,6 +203,7 @@ export default class DrizzlePostgresEventRepository implements EventRepository {
                 sourceUrl: input.sourceUrl,
                 externalTicketUrl: input.externalTicketUrl,
                 curatorNote: input.curatorNote,
+                priceFrom: input.priceFrom ?? null,
                 // A curated event has no team running it, so it is ACTIVE on listing
                 // rather than moving through the DRAFT lifecycle.
                 status: "ACTIVE",

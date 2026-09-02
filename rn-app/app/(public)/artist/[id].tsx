@@ -67,6 +67,7 @@ export default function ArtistScreen() {
                         <PublicEventRow
                             key={event.id}
                             event={event}
+                            showDate
                             onPress={() => router.push(`/e/${event.slug}` as never)}
                         />
                     ))}

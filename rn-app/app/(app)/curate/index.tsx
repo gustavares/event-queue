@@ -63,6 +63,8 @@ export default function CurateScreen() {
     const [draft, setDraft] = React.useState<Draft | null>(null);
     const [error, setError] = React.useState<string | null>(null);
     const [saved, setSaved] = React.useState<string | null>(null);
+    // AC-22 — when the source is already listed, link to it instead of only saying so.
+    const [duplicateSlug, setDuplicateSlug] = React.useState<string | null>(null);
 
     const [{ data: cityData }] = useQuery({ query: CITIES_QUERY });
     const [{ data: genreData }] = useQuery({ query: GENRES_QUERY });
@@ -77,14 +79,19 @@ export default function CurateScreen() {
     const handleExtract = async () => {
         setError(null);
         setSaved(null);
+        setDuplicateSlug(null);
 
         const result = await extract({ sourceUrl: url.trim() });
-        const message = result.error?.graphQLErrors[0]?.message;
+        const message =
+            result.error?.graphQLErrors[0]?.message ??
+            (result.error ? "We couldn't reach the server. Try again." : null);
 
         if (message) {
             setError(message);
-            // "We couldn't read that page" and "missing fields" both fall through to the
-            // form — that is the spec's behaviour, not a failure (BR-CUR-002/008).
+            const existing = result.error?.graphQLErrors[0]?.extensions?.existingSlug;
+            if (typeof existing === "string") setDuplicateSlug(existing);
+            // "We couldn't read that page" falls through to a blank manual form — that is the
+            // spec's behaviour for an unreadable page, not a failure (BR-CUR-002).
             if (message.startsWith("We couldn't read")) {
                 setDraft({ ...EMPTY, sourceUrl: url.trim() });
             }
@@ -92,6 +99,15 @@ export default function CurateScreen() {
         }
 
         const e = result.data?.extractEventFromUrl;
+        if (!e) {
+            // A response with neither data nor a GraphQL error. Rather than crash on the
+            // dereference, fall through to manual entry like any other unreadable page.
+            setError("We couldn't read that page. Enter the details manually.");
+            setDraft({ ...EMPTY, sourceUrl: url.trim() });
+            return;
+        }
+
+        const missingFields: string[] = e.missingFields ?? [];
         setDraft({
             ...EMPTY,
             sourceUrl: e.sourceUrl,
@@ -105,8 +121,14 @@ export default function CurateScreen() {
                     l.isHeadliner ? `*${l.name}` : l.name
                 )
                 .join(', '),
-            missingFields: e.missingFields ?? [],
+            missingFields,
         });
+
+        // BR-CUR-008 / AC-23. Highlighting the fields is not enough on its own — the spec
+        // requires the curator be told why they cannot list it yet.
+        if (missingFields.length > 0) {
+            setError("We couldn't read everything — fill in the highlighted fields.");
+        }
     };
 
     const handleConfirm = async () => {
@@ -117,6 +139,13 @@ export default function CurateScreen() {
         if (Number.isNaN(parsedDate.getTime())) {
             setError("We couldn't read everything — fill in the highlighted fields.");
             set({ missingFields: [...new Set([...draft.missingFields, 'startDate'])] });
+            return;
+        }
+
+        // The server rejects an unknown cityId, but an empty string produced a masked
+        // "Unexpected error." rather than telling the curator they forgot to pick one.
+        if (!draft.cityId) {
+            setError('Choose a city before listing this event.');
             return;
         }
 
@@ -145,13 +174,24 @@ export default function CurateScreen() {
             },
         });
 
-        const message = result.error?.graphQLErrors[0]?.message;
-        if (message) {
-            setError(message);
+        // Any error at all — including a network failure with no graphQLErrors — must keep
+        // the draft. Falling through on a non-GraphQL error cleared the whole reviewed form
+        // and reported success, losing everything the curator had just typed.
+        if (result.error) {
+            setError(
+                result.error.graphQLErrors[0]?.message ??
+                    "We couldn't save that. Check your connection and try again."
+            );
             return;
         }
 
-        setSaved(result.data?.confirmCuratedEvent?.slug ?? null);
+        const slug = result.data?.confirmCuratedEvent?.slug;
+        if (!slug) {
+            setError("We couldn't save that. Check your connection and try again.");
+            return;
+        }
+
+        setSaved(slug);
         setDraft(null);
         setUrl('');
     };
@@ -222,8 +262,15 @@ export default function CurateScreen() {
                 </View>
 
                 {error && (
-                    <View className='mt-4 border border-warning px-4 py-3 rounded-[4px]'>
+                    <View className='mt-4 border border-warning px-4 py-3 rounded-[4px] gap-2'>
                         <Text className='text-[13px] text-warning'>{error}</Text>
+                        {duplicateSlug && (
+                            <Pressable onPress={() => router.push(`/e/${duplicateSlug}` as never)}>
+                                <Text className='text-[13px] uppercase tracking-widest text-primary'>
+                                    See the existing listing →
+                                </Text>
+                            </Pressable>
+                        )}
                     </View>
                 )}
 

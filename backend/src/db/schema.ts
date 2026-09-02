@@ -91,6 +91,9 @@ export const event = pgTable('event', {
     // BR-CUR-005/009. Unique gives duplicate detection at the database rather than a
     // read-then-write that would race.
     sourceUrl: text('source_url').unique(),
+    // AC-6. Lowest advertised entry price in BRL. Set for CURATED events, which have no
+    // door-sale tiers to derive it from; first-party events fall back to MIN(tier.price).
+    priceFrom: real('price_from'),
     // BR-CUR-007.
     featuredFrom: timestamp('featured_from'),
     featuredUntil: timestamp('featured_until'),

@@ -11,14 +11,12 @@ export interface PublicEventSummary {
     status: string;
     source: string;
     venueName: string | null;
+    city?: { id: string; name: string; slug: string } | null;
     genres: { id: string; name: string; slug: string }[];
     lineup: { position: number; isHeadliner: boolean; artist: { id: string; name: string } }[];
 }
 
-function formatTime(value: string): string {
-    const d = new Date(value);
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
+import { formatListingTime, formatShortDate } from '~/lib/datetime';
 
 /**
  * One event in a city listing.
@@ -29,12 +27,23 @@ function formatTime(value: string): string {
 export function PublicEventRow({
     event,
     onPress,
+    showDate = false,
 }: {
     event: PublicEventSummary;
     onPress: () => void;
+    /**
+     * Set on lists that are NOT grouped by date — the artist page and the featured picks,
+     * where consecutive rows can be weeks apart and a bare time says nothing.
+     */
+    showDate?: boolean;
 }) {
+    // The server already returns the lineup in the curator's order (BR-ART-003), so read it
+    // in order rather than re-sorting. Splitting on isHeadliner and rendering only the
+    // headliners hid the ENTIRE lineup for any event where nobody was flagged — which is the
+    // common case for a club night with no billing hierarchy.
     const headliners = event.lineup.filter((l) => l.isHeadliner).map((l) => l.artist.name);
     const support = event.lineup.filter((l) => !l.isHeadliner).map((l) => l.artist.name);
+    const hasHeadliner = headliners.length > 0;
     const isCancelled = event.status === 'CANCELLED';
 
     return (
@@ -42,9 +51,16 @@ export function PublicEventRow({
             onPress={onPress}
             className='border-b border-border py-5 flex-row gap-4'
         >
-            <Text className='font-mono text-[13px] text-primary w-14 pt-1'>
-                {formatTime(event.startDate)}
-            </Text>
+            <View className='w-14 pt-1'>
+                <Text className='font-mono text-[13px] text-primary'>
+                    {formatListingTime(event.startDate)}
+                </Text>
+                {showDate && (
+                    <Text className='font-mono text-[10px] text-muted-foreground mt-0.5'>
+                        {formatShortDate(event.startDate)}
+                    </Text>
+                )}
+            </View>
 
             <View className='flex-1 gap-1'>
                 <View className='flex-row items-start gap-2'>
@@ -66,10 +82,10 @@ export function PublicEventRow({
                     <Text className='text-[13px] text-muted-foreground'>{event.venueName}</Text>
                 )}
 
-                {headliners.length > 0 && (
+                {event.lineup.length > 0 && (
                     <Text className='text-[14px] text-foreground mt-1'>
-                        {headliners.join(', ')}
-                        {support.length > 0 && (
+                        {hasHeadliner ? headliners.join(', ') : support.join(', ')}
+                        {hasHeadliner && support.length > 0 && (
                             <Text className='text-muted-foreground'>
                                 {'  '}
                                 {support.join(', ')}

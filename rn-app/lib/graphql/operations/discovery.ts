@@ -19,6 +19,7 @@ const PUBLIC_EVENT_FIELDS = `
   source
   venueName
   venueAddress
+  priceFrom
   externalTicketUrl
   city { id name state slug }
   genres { id name slug }
@@ -113,5 +114,17 @@ export const EXTRACT_EVENT_MUTATION = gql`
 export const CONFIRM_CURATED_EVENT_MUTATION = gql`
   mutation ConfirmCuratedEvent($input: ConfirmCuratedEventInput!) {
     confirmCuratedEvent(input: $input) { id slug name }
+  }
+`;
+
+export const SET_CURATOR_NOTE_MUTATION = gql`
+  mutation SetCuratorNote($eventId: ID!, $note: String!) {
+    setCuratorNote(eventId: $eventId, note: $note) { id slug curatorNote }
+  }
+`;
+
+export const SET_FEATURED_MUTATION = gql`
+  mutation SetFeatured($eventId: ID!, $from: DateTime!, $until: DateTime!) {
+    setFeatured(eventId: $eventId, from: $from, until: $until) { id slug }
   }
 `;

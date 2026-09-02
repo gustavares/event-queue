@@ -1,7 +1,7 @@
 import { PublicEventEntity, PublicEventFilter } from "./public-event.entity";
 import { EventStatus } from "./event.entity";
-import { event, venue, city, eventGenre, genre, eventArtist } from "../db/schema";
-import { and, eq, gt, lt, lte, gte, inArray, asc, isNotNull, or, sql, SQL } from "drizzle-orm";
+import { event, venue, city, eventGenre, genre, eventArtist, doorSaleTier } from "../db/schema";
+import { and, eq, gt, lt, lte, gte, inArray, asc, isNotNull, sql, SQL } from "drizzle-orm";
 import { Database } from "../db";
 
 export interface PublicEventRepository {
@@ -54,16 +54,18 @@ export default class DrizzlePostgresPublicEventRepository implements PublicEvent
                 cityName: city.name,
                 cityState: city.state,
                 citySlug: city.slug,
+                priceFrom: sql<number | null>`COALESCE(${event.priceFrom}, (SELECT MIN(${doorSaleTier.price}) FROM ${doorSaleTier} WHERE ${doorSaleTier.eventId} = ${event.id}))`,
                 externalTicketUrl: event.externalTicketUrl,
-                featuredFrom: event.featuredFrom,
-                featuredUntil: event.featuredUntil,
             })
             .from(event)
             .leftJoin(venue, eq(event.venueId, venue.id))
-            // The city is whichever of the two is set; the join resolves both cases at once.
+            // COALESCE, not OR. `event.city_id = city.id OR venue.city_id = city.id` matches
+            // TWO city rows when the two disagree — duplicating the event in every listing and
+            // making PublicEvent.city non-deterministic under LIMIT 1. Coalescing expresses the
+            // documented rule exactly: the event's own city wins, the venue's is the fallback.
             .leftJoin(
                 city,
-                or(eq(event.cityId, city.id), eq(venue.cityId, city.id))
+                eq(city.id, sql`COALESCE(${event.cityId}, ${venue.cityId})`)
             );
     }
 
@@ -84,9 +86,8 @@ export default class DrizzlePostgresPublicEventRepository implements PublicEvent
             cityName: row.cityName as string,
             cityState: row.cityState as string,
             citySlug: row.citySlug as string,
+            priceFrom: row.priceFrom === null || row.priceFrom === undefined ? null : Number(row.priceFrom),
             externalTicketUrl: (row.externalTicketUrl as string | null) ?? null,
-            featuredFrom: (row.featuredFrom as Date | null) ?? null,
-            featuredUntil: (row.featuredUntil as Date | null) ?? null,
         };
     }
 

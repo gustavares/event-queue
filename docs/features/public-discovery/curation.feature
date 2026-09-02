@@ -129,7 +129,12 @@ Feature: Curating third-party events
   Scenario: A visitor with no account cannot curate
     Given I am not signed in
     When I submit "https://example.com/festa" for curation
-    Then I see the error "You don't have access to that."
+    # Deliberately NOT "You don't have access to that." — with no session at all the answer
+    # is "Authentication required" carrying the UNAUTHENTICATED code, which is the contract
+    # the client's session handling depends on to clear the token and redirect to sign-in.
+    # "You don't have access to that." is the answer for someone who IS signed in but lacks
+    # the curator capability.
+    Then I see the error "Authentication required"
     And no event is created
 
   # ─────────────────────────────────────────────────────

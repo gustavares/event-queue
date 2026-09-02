@@ -12,6 +12,8 @@ import { Text } from '~/components/ui/text';
 import { StatusBadge } from '~/components/ui/status-badge';
 import { SectionHeader } from '~/components/ui/section-header';
 import { ConfirmDialog } from '~/components/ui/confirm-dialog';
+import { PublishPanel } from '~/components/ui/publish-panel';
+import { ME_QUERY } from '~/lib/graphql/operations/auth';
 import {
     GET_EVENT_QUERY,
     TRANSITION_EVENT_STATUS_MUTATION,
@@ -46,6 +48,7 @@ export default function EventDetailScreen() {
         type: 'cancel' | 'delete' | 'publish' | 'close' | 'reopen' | null;
     }>({ visible: false, type: null });
 
+    const [{ data: meData }] = useQuery({ query: ME_QUERY });
     const [{ data, fetching }, reExecute] = useQuery({
         query: GET_EVENT_QUERY,
         variables: { id },
@@ -224,6 +227,20 @@ export default function EventDetailScreen() {
                     ) : (
                         <Text className='text-muted-foreground text-[14px] mt-3'>Not enabled</Text>
                     )}
+                </View>
+
+                {/* PUBLIC LISTING — AC-27/AC-28, and AC-24 for curators */}
+                <View className='px-6 mb-6'>
+                    <PublishPanel
+                        eventId={event.id}
+                        status={status}
+                        publicSlug={event.visibility === 'PUBLIC' ? event.slug : null}
+                        curatorNote={event.curatorNote}
+                        venueCityName={event.venue?.city?.name}
+                        hasVenueCity={Boolean(event.venue?.city)}
+                        isCurator={Boolean(meData?.me?.isCurator)}
+                        onChanged={() => reExecute({ requestPolicy: 'network-only' })}
+                    />
                 </View>
             </ScrollView>
 
